@@ -1,0 +1,75 @@
+<div class="titlebar">
+  <div class="left-tab">
+    <button id="center-btn"><i class="fa fa-align-justify"></i></button>
+    <button id="settings-btn"><i class="fa fa-cog"></i></button>
+  </div>
+  <div class="right-tab">
+    <button id="close-btn"><i class="fa fa-times"></i></button>
+    <button id="min-btn"><i class="fa fa-window-minimize"></i></button>
+  </div>
+</div>
+<div class="settings modal fade" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Settings</h5>
+        <button class="close" data-dismiss="modal">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+        <div class="row">
+          <div class="col">
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <label class="input-group-text">Resolutions</label>
+              </div>
+              <select class="resolution col">
+                <option value="1">1024x576</option>
+                <option value="2">1280x720</option>
+                <option value="3">1600x900</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="exit_confirm modal fade">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Exit</h5>
+      </div>
+      <div class="modal-body" style="margin-bottom: 0px;">
+        Are you really want to Exit?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="exit_exit_confirm">No</button>
+        <button type="button" class="btn btn-secondary" onclick="$('html, body').animate({ 'opacity': '0' }, 700);$('.login-bar').animate({'right': '270px'}, 1100, function(){remote.BrowserWindow.getFocusedWindow().close()});">Yes</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="lostconnectionmodal modal fade" style="z-index: 20000000">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Lost connection</h5>
+      </div>
+      <div class="modal-body" style="margin-bottom: 0px;">
+        <img src="./../assets/imgs/spinner.gif" style="padding-right: 5px;" />
+        <span>You lost connection with our system, please wait or relog!</span>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary lcmbtn" onclick="$('html, body').animate({ 'opacity': '0' }, 700);$('.login-bar').animate({'right': '270px'}, 1100, function(){remote.BrowserWindow.getFocusedWindow().close()});" disabled>Exit <span class="lcmcd">5</span></button>
+      </div>
+    </div>
+  </div>
+</div>

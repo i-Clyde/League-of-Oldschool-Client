@@ -1,0 +1,85 @@
+<div class="row login-form">
+  <div class="col login-bar">
+    <div class="log-inputs">
+      <span class="text-danger connectionstatus-error" style="display: hidden"><b></b></span>
+      <h3><b>SIGN IN</b></h3>
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" class="form-control" min="3" max="20" id="login-input" autofocus>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" class="form-control" min="6" max="28" id="password-input">
+      </div>
+      <div class="form-group form-check">
+        <label class="custom-checkbox">
+          <input type="checkbox" class="form-check-input" id="remember-input">
+          <span class="checkbox-image"></span>
+          <span class="checkbox-label">Remember Me</label>
+        </label>
+      </div>
+    </div>
+    <div class="reg-inputs" style="left: -270px">
+      <h3><b>REGISTER</b></h3>
+      <div class="form-group">
+        <label>Username <i><span id="span-reg-username" class="text-danger"></span></i></label>
+        <input type="text" class="form-control" min="3" max="20" id="login-reg-input" autofocus>
+      </div>
+      <div class="form-group">
+        <label>E-mail <i><span id="span-reg-email" class="text-danger"></span></i></label>
+        <input type="email" class="form-control" max="64" id="email-reg-input">
+      </div>
+      <div class="form-group" style="z-index: 50">
+        <label>Password</label>
+        <input type="password" class="form-control" min="6" max="28" id="password-reg-input" style="z-index: 50">
+      </div>
+      <div class="form-group" style="z-index: 50">
+        <label>Confirm password <i><span id="span-reg-password2" min="6" max="28" class="text-danger"></span></i></label>
+        <input type="password" class="form-control" id="password-reg-input2" style="z-index: 50">
+      </div>
+      <div class="form-group form-check" style="z-index: 50">
+        <label class="custom-checkbox">
+          <input type="checkbox" class="form-check-input" id="remember-reg-input" value="yes">
+          <span class="checkbox-image"></span>
+          <span class="checkbox-label">I am at least 13 years old</label>
+        </label>
+      </div>
+    </div>
+    <footer>
+      <button type="submit" class="btn" id="submit-log" disabled><b>SIGN IN</b><img src="../assets/imgs/spinner.gif" id="log-spinner" style="display: none" /></button>
+      <button type="submit" class="btn" id="submit-reg" style="left: -270px" disabled><b>REGISTER</b><img src="../assets/imgs/spinner.gif" id="reg-spinner" style="display: none" /></button>
+      <div class="links">
+        <i id="account-1" class="text-muted" style="position: absolute;">Forgot password? [Disabled]</i><br />
+        <div style="margin-bottom: 20px;">
+          <a id="account-2" href="#" style="position: absolute;">Do not have an account?</a>
+          <a class="back-to-login" href="#" style="opacity: 0; left: -270px; position: absolute;">Already have an account?</a>
+        </div>
+      </div>
+      <div class="footer">
+        <span>V0.3.7 by iClyde</span>
+      </div>
+    </footer>
+  </div>
+</div>
+<div class="termsofuse_modal modal fade">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Terms of use</h5>
+      </div>
+      <div class="modal-body">
+        <p class="termsofuse_text">
+          By using this app you agree to use and store your personal data like ip address by us.
+          We are using this data to provide better use experience.
+          We WILL NOT share your private data with third party companies.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="$('html, body').animate({ 'opacity': '0' }, 700);$('.login-bar').animate({'right': '270px'}, 1100, function(){remote.BrowserWindow.getFocusedWindow().close()});">I do not accept</button>
+        <button type="button" class="btn btn-secondary" onclick="localStorage.setItem('termsofuse', true); $('.termsofuse_modal').modal('toggle')">I accept and understand</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="login-alerts"></div>
+<script src="../assets/js/modules/loginpage.js"></script>

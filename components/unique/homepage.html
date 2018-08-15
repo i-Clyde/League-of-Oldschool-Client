@@ -1,0 +1,175 @@
+<div class="client-alerts"></div>
+<div class="setup"></div>
+<div class="confirm_action modal fade">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title confirm_action_title">This operation requires confirmation</h5>
+      </div>
+      <div class="modal-body confirm_action_body" style="margin-bottom: 0px;"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary confirm_action_no">No</button>
+        <button type="button" class="btn btn-secondary confirm_action_yes">Yes</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="iconsmenu modal fade">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content icon-cont">
+      <div class="modal-header">
+        <h5 class="modal-title">Select your new icon!</h5>
+      </div>
+      <div class="modal-body" style="margin-bottom: 0px;">
+
+        <div class="row">
+          <div class="col icon-col">
+            <form>
+              <div class="iconmenu"></div>
+            </form>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="saveiconbtn">
+          <img src="../assets/imgs/spinner.gif" style="display: none" id="icmnsvspinner" />
+          <b>Save my choice!</b>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="social-zone">
+  <div class="social-header">
+    <div class="social-header-sub">
+      <div class="social-header-status-bar"></div>
+      <div class="social-icon">
+        <div class="social-icon-change">Change</div>
+        <img class="social-icon-img status-1" src="../assets/imgs/profileicon/0.png">
+      </div>
+      <div class="social-header-pinfo">
+        <div class="social-nick"></div>
+        <div>
+          <input class="social-description status-1"></input>
+        </div>
+      </div>
+      <div style="clear: both"></div>
+    </div>
+  </div>
+  <div class="social-content">
+    <div class="social-type-friends social-module">
+      <div class="social-content-search">
+        <i class="fa fa-search social-search-icon"></i>
+        <input type="text" class="social-search-input" placeholder="Search for friend..." />
+      </div>
+
+      <div class="social-content-friend-list">
+
+        <div class="social-content-no-friends">
+          <img class="social-content-no-friends-img" src="./../assets/imgs/sadporo.webp" /><br />
+          <span>No friends yet?<br />Invite them with <i class="fa fa-plus"></i> below!</span>
+        </div>
+
+      </div>
+
+    </div>
+    <div class="social-type-invites social-module">
+
+      <div class="social-content-search">
+        <i class="fa fa-search social-search-icon"></i>
+        <input type="text" class="social-search-input add-friends-input" placeholder="Type nick and press enter!" />
+      </div>
+
+      <div class="friend-requests" style="margin-top: -1px;">
+        <div class="friend-req-title"><b>Friend requests</b></div>
+        <div class="friend-req no-pending-fr"><span>There is no pending requests!</span></div>
+      </div>
+      <div class="your-friend-requests">
+        <div class="friend-req-title"><b>Your friend requests</b></div>
+        <div class="friend-req no-pending-yfr"><span>There is no pending requests!</span></div>
+      </div>
+
+    </div>
+    <div class="social-type-ignores social-module">
+      <div class="social-content-search">
+        <i class="fa fa-search social-search-icon"></i>
+        <input type="text" class="social-search-input add-ignore-input" placeholder="Type nick and press enter!" />
+      </div>
+      <div class="your-ignores" style="margin-top: -1px;">
+        <div class="friend-req-title ignore-title"><b>Your ignores</b></div>
+        <div class="friend-req no-ignores-yet ignored-p"><span>There is no ignores yet!</span></div>
+      </div>
+
+    </div>
+  </div>
+  <div class="social-footer">
+    <div class="social-footer-sub">
+      <div class="social-footer-addfriend social-hover"><i class="fa fa-plus"></i><div class="badge badge-warning notification-badge friends"></div></div>
+      <div class="social-footer-globalchat social-hover"><i class="fa fa-comment-alt"></i><div class="badge badge-warning notification-badge chats"></div></div>
+      <div class="social-footer-ignoremenu social-hover"><i class="fa fa-exclamation-triangle"></i></div>
+      <div style="clear: both"></div>
+    </div>
+  </div>
+</div>
+<div class="client-menu">
+  <div class="client-menu-sub">
+    <div class="client-menu-left">
+      <button class="client-menu-playbtn client-menu-btn">PLAY</button>
+      <div style="clear: both"></div>
+    </div>
+    <div class="client-menu-right">
+      <button class="client-menu-profilebtn client-menu-btn">PROFILE</button>
+      <button class="client-menu-homepagebtn client-menu-btn">HOME</button>
+      <div style="clear: both"></div>
+    </div>
+  </div>
+</div>
+<div class="homepage">
+
+</div>
+<div class="chat-box">
+  <div class="chat-box-controls">
+    <span class="chat-box-title"><b>Chat box</b></span>
+    <div class="chat-box-control-exit chat-box-control-btn"><i class="fa fa-times"></i></div>
+    <div class="chat-box-control-minimize chat-box-control-btn"><i class="fa fa-window-minimize"></i></div>
+  </div>
+  <div class="chat-box-content">
+    <div class="chat-box-chats">
+
+      <div class="chat-box-category">Server chats</div>
+
+      <div class="chat-box-chats-chatter social-hover" cid="0">
+        <img class="chat-box-chatter-img status-1" src="./../assets/imgs/profileicon/587.png" />
+        <div class="chat-box-chatter-info">
+          <div class="chat-box-chatter-info-basic">
+            <div class="chat-box-nick-sub">
+              <div class="chat-box-chatter-nick">Global chat</div>
+              <span class="chat-box-newmsg badge badge-warning">2</span>
+              <div style="clear: both"></div>
+            </div>
+            <div class="chat-box-chatter-lastmsg" cid="0">No messages yet!</div>
+          </div>
+        </div>
+        <div style="clear: both"></div>
+      </div>
+
+      <div class="chat-box-category my-c" style="opacity: 0">Own chats</div>
+
+    </div>
+    <div class="chat-box-chat">
+      <div class="chat-box-conversation" id="chatbox-sc">
+        <span class="chat-warning-info">Never share your data like password, login or email on this chat!</span>
+
+        <div class="chat-box-conversation-content"></div>
+
+      </div>
+      <div class="chat-box-input-side">
+        <input type="text" class="chat-box-input" placeholder="Type your message!"/>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="../assets/js/modules/homepage.js"></script>
