@@ -229,7 +229,7 @@ $('body').tooltip({
 
         if (cid == 0) {
           updateChatTitle('Public Chat')
-        } else {let nick = $('.social-content-sub[pid='+pid+'] .social-friend-nick span b').text();updateChatTitle(nick)}
+        } else {let nick = $('.social-content-sub[pid='+cid+'] .social-friend-nick span b').text();updateChatTitle(nick)}
       }
 
       function updateChatTitle(type, others='') {
@@ -337,21 +337,22 @@ $('body').tooltip({
       })
 
       // Function for data check (when msg was sent)
-      function whenMsgWasSent(milis = false) {
+      function whenMsgWasSent(milis = false, first=false) {
 
-        let last = new Date(parseInt($('.chat-box-conversation-content .chat-msg-content').last().attr('date')));
+        let last;
+        if (!first) last = new Date(parseInt($('.chat-box-conversation-content .chat-msg-content').last().attr('date')));
         let now = (!milis)? new Date() : new Date(parseInt(milis));
 
         if (!milis) {
           if (isNaN(last)) return whenMsgWasSentPre(now);
           else {
-            if (last.getDate() == now.getDate() && last.getFullYear() == now.getFullYear()) return('');
+            if (last.getDate() == now.getDate() && last.getMonth() == now.getMonth() && last.getFullYear() == now.getFullYear()) return('');
             else return whenMsgWasSentPre(now);
           }
         } else {
           if (isNaN(last)) return whenMsgWasSentPre(now)
           else {
-            if (last.getDate() == now.getDate() && last.getFullYear() == now.getFullYear()) return('');
+            if (last.getDate() == now.getDate() && last.getMonth() == now.getMonth() && last.getFullYear() == now.getFullYear()) return('');
             else return whenMsgWasSentPre(now);
           }
         }
@@ -386,15 +387,24 @@ $('body').tooltip({
 
         if (last_pid != data.from || last_pid === undefined) from = '<div class="chat-msg-nick">'+data.fromnick+' says:</div>';
         if (localStorage.getItem('playerid') == data.from) {isyou = ' you';from = ''}
-        $('.chat-box-chatter-lastmsg[cid='+data.cid+']').text((isyou == ' you'?'You: ':'')+data.msg)
+        $('.chat-box-chatter-lastmsg[cid='+data.cid+']').html((isyou == ' you'?'You: ':'')+data.msg)
 
         let date = new Date();
         let h = (date.getHours() <= 9)?'0'+date.getHours():date.getHours();
         let i = (date.getMinutes() <= 9)?'0'+date.getMinutes():date.getMinutes();
 
-        $('.chat-box-conversation-content').append(whenMsgWasSent()+'<div class="chat-msg-content" title="" pid="'+data.from+'" date="'+data.date+'">'+from+'<div class="chat-msg'+isyou+'" rel="tooltip" title="'+h+':'+i+'" rel="tooltip"><span>'+data.msg+'</span></div><div style="clear: both"></div></div>');
+        $('.chat-box-conversation-content').append('<div class="chat-msg-content" pid="'+data.from+'" date="'+data.date+'">'+whenMsgWasSent()+from+'<div class="chat-msg'+isyou+'" rel="tooltip" title="'+h+':'+i+'" rel="tooltip"><span>'+data.msg+'</span></div><div style="clear: both"></div></div>');
 
         $('.chat-box-conversation').animate({ scrollTop: $('.chat-box-conversation-content').height() }, "fast");
+
+        if ($('.chat-box-conversation-content .chat-msg-content').length > 40) {
+          $('.chat-box-conversation-content .chat-msg-content').first().remove();
+          if ($('.chat-box-conversation-content .chat-msg-content').first().find('.chat-date').length == 0) {
+            let mili = $('.chat-box-conversation-content .chat-msg-content').first().attr('date');
+            $('.chat-box-conversation-content .chat-msg-content').first().prepend(whenMsgWasSent(mili, true));
+          }
+
+        }
       });
 
       // Scroll chat to the bottom
@@ -405,26 +415,27 @@ $('body').tooltip({
 
       // Get old messages
       function loadSocialMessages(cid) {
-        socket.emit('load old messages', cid);
+        if ($('.chat-box-conversation-content').attr('cid') != cid) socket.emit('load old messages', cid);
       }
 
-      socket.on('load old message res', function(globalhistory) {
+      socket.on('load old message res', function(data) {
 
+        $('.chat-box-conversation-content').attr({'cid': data.cid});
         $('.chat-box-conversation-content').html('');
 
-        $.each(globalhistory, (key, value) => {
+        $.each(data.history, (key, value) => {
           let date = new Date(parseInt(value['date']));
           let from = value['pid'], isyou = (value['pid'] == localStorage.getItem('playerid')?' you':''), dayhr = '';
           let last_msg = $('.chat-box-conversation-content .chat-msg-content').last();
           let last_pid = last_msg.attr('pid');let last_date = last_msg.attr('date');
           if ((last_pid != value['pid'] || last_pid === undefined) && (isyou != ' you')) froms = '<div class="chat-msg-nick">'+value['nickname']+' says:</div>'; else froms = '';
 
-          $('.chat-box-chatter-lastmsg[cid=0]').text((isyou == ' you'?'You: ':'')+value['msg'])
+          $('.chat-box-chatter-lastmsg[cid=0]').html((isyou == ' you'?'You: ':'')+value['msg'])
 
           let h = (date.getHours() <= 9)?'0'+date.getHours():date.getHours();
           let i = (date.getMinutes() <= 9)?'0'+date.getMinutes():date.getMinutes();
 
-          $('.chat-box-conversation-content').append(whenMsgWasSent(value['date'])+'<div class="chat-msg-content" pid="'+from+'" date="'+value['date']+'">'+froms+'<div class="chat-msg'+isyou+'" rel="tooltip" title="'+h+':'+i+'" rel="tooltip"><span href="#">'+value['msg']+'</span></div><div style="clear: both"></div></div>');
+          $('.chat-box-conversation-content').append('<div class="chat-msg-content" pid="'+from+'" date="'+value['date']+'">'+whenMsgWasSent(value['date'])+froms+'<div class="chat-msg'+isyou+'" rel="tooltip" title="'+h+':'+i+'" rel="tooltip"><span href="#">'+value['msg']+'</span></div><div style="clear: both"></div></div>');
 
         });
 
@@ -604,7 +615,9 @@ $('body').tooltip({
         updateDesc(data.pid, data.socialstatus, data.description)
         if ($('.social-content-friend-list .social-content-sub').length > 0) $('.social-content-no-friends').hide();
         $('.your-friend-requests div.friend-req[pid='+data.pid+']').remove();
+        $('.friend-requests div.friend-req[pid='+data.pid+']').remove();
         if ($('.your-friend-requests .friend-req').length == 1) $('.no-pending-yfr').show();
+        if ($('.friend-requests .friend-req').length == 1) $('.no-pending-fr').show();
         notifyPendingFriendRequests();
       })
 

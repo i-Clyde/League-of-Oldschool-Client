@@ -1,7 +1,7 @@
 {
   "name": "oldleague",
   "productName": "oldSchoolLeague",
-  "version": "0.3.3",
+  "version": "0.3.7",
   "description": "League of Oldschool client",
   "main": "main.js",
   "scripts": {
