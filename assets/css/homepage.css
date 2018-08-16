@@ -471,9 +471,17 @@
 }
 
 .chat-box-newmsg {
-  float: right;
-  margin-top: 3px;
-  margin-right: 3px;
+  position: absolute;
+  margin-top: 36px;
+  margin-left: 9px;
+  height: 13px;
+  width: 43px;
+  line-height: 6px;
+  font-size: 10px;
+}
+
+.chat-box-newmsg.profile {
+  margin-left: 3px !important;
 }
 
 .chat-box-chats-chatter[data-selected=true] {
@@ -493,6 +501,15 @@
 .chat-msg.you {
   float: right;
   text-align: right;
+}
+
+.chat-msg.unread-msg {
+  border: 1px solid #fff700;
+  transition: border-color 3s;
+}
+
+.badge-warning {
+  opacity: 0;
 }
 
 .chat-msg-nick {

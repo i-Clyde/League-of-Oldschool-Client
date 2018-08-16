@@ -13,7 +13,8 @@ html {
 }
 body {
   overflow: hidden;
-  color: white;;
+  color: white;
+  border-radius: 5px;
 }
 :not(input):not(textarea),
 :not(input):not(textarea)::after,
@@ -193,6 +194,7 @@ input, button, textarea, :focus {
 }
 #main-client {
   background-size: cover;height: 100vh;
+  border-radius: 5px;
 }
 
 .login-form {

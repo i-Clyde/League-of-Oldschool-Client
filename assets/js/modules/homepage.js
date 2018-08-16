@@ -66,6 +66,16 @@ $('body').tooltip({
         $('.social-zone .social-nick').html('<b>'+data.nickname+'</b>');
         $('.social-zone .social-description').attr('value', desc);
         $('.social-zone .social-icon .social-icon-img').attr('src', '../assets/imgs/profileicon/'+data.icon+'.png')
+
+        $('.chat-box-chatter-lastmsg[cid=0]').html(((data.lastGMSG.pid == localStorage.getItem('playerid'))?'You: ':'')+data.lastGMSG.msg)
+
+        $.each(data.messageHistory, function(index) {
+          for(let i = 0, len = data.messageHistory[index].length; i < len; i++) {
+            if (i == 0) addNewChatter(index, true, 'No messages yet!');
+            if (!isNaN(data.messageHistory[index][i].unread) && data.messageHistory[index][i].unread == true) newMsgNotify(index, index)
+            if (i == len-1) $('.chat-box-chatter-lastmsg[cid='+index+']').html((((data.messageHistory[index][i].you)?'You: ':'')+data.messageHistory[index][i].msg));
+          }
+        })
       })
 
       // Description changer (your)
@@ -236,22 +246,27 @@ $('body').tooltip({
         $('.chat-box-title').html('<b>'+type+'</b>'+'<i>'+others+'</i>')
       }
 
-      function addNewChatter(cid) {
+      function addNewChatter(cid, newmsg=false, lastmsg=null) {
         $('.chat-box-conversation-content').html('');
 
         let img = $('.social-content-sub[pid='+cid+'] .social-friend-icon img').attr('src');
         let status = $('.social-content-sub[pid='+cid+']').attr('status');
         let nick = $('.social-content-sub[pid='+cid+'] .social-friend-nick span b').text();
-        let newchatter = '<div class="chat-box-chats-chatter social-hover" cid="'+cid+'" style="opacity: 0"><img class="chat-box-chatter-img status-'+status+'" src="'+img+'" /><div class="chat-box-chatter-info"><div class="chat-box-chatter-info-basic"><div class="chat-box-nick-sub"><div class="chat-box-chatter-nick">'+nick+'</div><span class="chat-box-newmsg badge badge-warning" cid="'+cid+'"></span><div style="clear: both"></div></div><div class="chat-box-chatter-lastmsg" cid="'+cid+'">No messages yet!</div></div></div><div style="clear: both"></div></div>';
+        let newchatter = '<div class="chat-box-chats-chatter social-hover" cid="'+cid+'" style="opacity: 0"><span class="chat-box-newmsg badge badge-warning" cid="'+cid+'"></span><img class="chat-box-chatter-img status-'+status+'" src="'+img+'" /><div class="chat-box-chatter-info"><div class="chat-box-chatter-info-basic"><div class="chat-box-nick-sub"><div class="chat-box-chatter-nick">'+nick+'</div><div style="clear: both"></div></div><div class="chat-box-chatter-lastmsg" cid="'+cid+'">No messages yet!</div></div></div><div style="clear: both"></div></div>';
 
         if ($('.chat-box-chats-chatter').length == 1) $('.chat-box-category.my-c').animate({'opacity': '1'})
 
         $('.chat-box-category.my-c').after(newchatter);
 
-        $('.chat-box-chats-chatter').removeAttr('data-selected');
-        $('.chat-box-chats-chatter[cid='+cid+']').attr({'data-selected': 'true'});
+        if (!newmsg) {
+          $('.chat-box-chats-chatter').removeAttr('data-selected');
+          $('.chat-box-chats-chatter[cid='+cid+']').attr({'data-selected': 'true'});
+          $('.chat-box-chatter-lastmsg[cid='+cid+']').html(lastmsg)
+          updateChatTitle(nick);
+        }
+
+
         $('.chat-box-chats-chatter[cid='+cid+']').animate({'opacity': '1'});
-        updateChatTitle(nick);
       }
 
       // Open chat on click friend
@@ -379,32 +394,82 @@ $('body').tooltip({
         else return(createOutput('In the future'))
       }
 
+      // Add new message notifi
+      function newMsgNotify(pid, from) {
+        if (from != localStorage.getItem('playerid')) {
+
+        let newmsgs = parseInt($('.chat-box-newmsg.profile[pid='+pid+']').attr('data-new')); newmsgs++;
+
+        $('.chat-box-newmsg[cid='+pid+']').text(newmsgs+' new')
+        $('.chat-box-newmsg[cid='+pid+']').animate({'opacity': 1}, 800)
+        $('.chat-box-newmsg.profile[pid='+pid+']').attr('data-new', newmsgs)
+        $('.chat-box-newmsg.profile[pid='+pid+']').attr('data-newmsgs', true)
+        $('.chat-box-newmsg.profile[pid='+pid+']').text(newmsgs+' new')
+        $('.chat-box-newmsg.profile[pid='+pid+']').animate({'opacity': 1}, 800)
+
+        $('.notification-badge.chats').text($('.social-content-friend-list .chat-box-newmsg.profile[data-newmsgs=true]').length+' new').animate({'opacity': 1}, 400);
+        }
+      }
+
+      // Mark as read MSG
+      function msgHasBeenRead(pid) {
+
+        $('.chat-box-newmsg[cid='+pid+']').animate({'opacity': 0}, 800, function() {
+          $('.chat-box-newmsg[cid='+pid+']').text('')
+        })
+        $('.chat-box-newmsg.profile[pid='+pid+']').attr('data-new', 0)
+        $('.chat-box-newmsg.profile[pid='+pid+']').attr('data-newmsgs', false)
+        $('.chat-box-newmsg.profile[pid='+pid+']').animate({'opacity': 0}, 800, function() {
+          $('.chat-box-newmsg.profile[pid='+pid+']').text('')
+        })
+
+
+        let unReads = $('.social-content-friend-list .chat-box-newmsg.profile[data-newmsgs=true]').length;
+        $('.notification-badge.chats').text(unReads+' new');
+        if (unReads > 0) $('.notification-badge.chats').animate({'opacity': 1}, 400); else $('.notification-badge.chats').animate({'opacity': 0}, 400);
+
+        setTimeout(() => {
+          $('.chat-box-conversation-content[cid='+pid+'] .chat-msg.unread-msg').css({'border': '1px solid rgba(100, 100, 100, 0.6)'});
+          setTimeout(() => {
+            $('.chat-box-conversation-content[cid='+pid+'] div.chat-msg').removeClass('unread-msg');
+          }, 3100)
+        }, 5000)
+
+        socket.emit('mark messages as read', {'pid': pid})
+
+      }
+
       // Catch new message to global chat
       socket.on('new message', data => {
-        var last_msg = $('.chat-box-conversation-content .chat-msg-content').last();
-        var last_pid = last_msg.attr('pid');let last_date = last_msg.attr('date');
+        var last_msg = $('.chat-box-conversation-content[cid='+data.cid+'] .chat-msg-content').last();
+        var last_pid = last_msg.attr('pid');
         var from = '', isyou = '';
 
-        if (last_pid != data.from || last_pid === undefined) from = '<div class="chat-msg-nick">'+data.fromnick+' says:</div>';
+        if ((last_pid != data.from || last_pid === undefined) && data.cid == 0 ) from = '<div class="chat-msg-nick">'+data.fromnick+' says:</div>';
         if (localStorage.getItem('playerid') == data.from) {isyou = ' you';from = ''}
         $('.chat-box-chatter-lastmsg[cid='+data.cid+']').html((isyou == ' you'?'You: ':'')+data.msg)
+
+        if (data.cid != 0) {
+          if (!($('.chat-box-chats-chatter[cid='+data.cid+']').length > 0) && data.cid != localStorage.getItem('playerid')) addNewChatter(data.cid, true);
+          newMsgNotify(data.cid, data.from, (isyou == ' you'?'You: ':'')+data.msg);
+        }
 
         let date = new Date();
         let h = (date.getHours() <= 9)?'0'+date.getHours():date.getHours();
         let i = (date.getMinutes() <= 9)?'0'+date.getMinutes():date.getMinutes();
 
-        $('.chat-box-conversation-content').append('<div class="chat-msg-content" pid="'+data.from+'" date="'+data.date+'">'+whenMsgWasSent()+from+'<div class="chat-msg'+isyou+'" rel="tooltip" title="'+h+':'+i+'" rel="tooltip"><span>'+data.msg+'</span></div><div style="clear: both"></div></div>');
+        $('.chat-box-conversation-content[cid='+data.cid+']').append('<div class="chat-msg-content" pid="'+data.from+'" date="'+data.date+'">'+whenMsgWasSent()+from+'<div class="chat-msg'+isyou+'" rel="tooltip" title="'+h+':'+i+'" rel="tooltip"><span>'+data.msg+'</span></div><div style="clear: both"></div></div>');
 
-        $('.chat-box-conversation').animate({ scrollTop: $('.chat-box-conversation-content').height() }, "fast");
+        $('.chat-box-conversation').animate({ scrollTop: $('.chat-box-conversation-content[cid='+data.cid+']').height() }, "fast");
 
-        if ($('.chat-box-conversation-content .chat-msg-content').length > 40) {
-          $('.chat-box-conversation-content .chat-msg-content').first().remove();
-          if ($('.chat-box-conversation-content .chat-msg-content').first().find('.chat-date').length == 0) {
-            let mili = $('.chat-box-conversation-content .chat-msg-content').first().attr('date');
-            $('.chat-box-conversation-content .chat-msg-content').first().prepend(whenMsgWasSent(mili, true));
+        if ($('.chat-box-conversation-content[cid='+data.cid+'] .chat-msg-content').length > 40) {
+          $('.chat-box-conversation-content[cid='+data.cid+'] .chat-msg-content').first().remove();
+          if ($('.chat-box-conversation-content[cid='+data.cid+'] .chat-msg-content').first().find('.chat-date').length == 0) {
+            let mili = $('.chat-box-conversation-content[cid='+data.cid+'] .chat-msg-content').first().attr('date');
+            $('.chat-box-conversation-content[cid='+data.cid+'] .chat-msg-content').first().prepend(whenMsgWasSent(mili, true));
           }
-
         }
+
       });
 
       // Scroll chat to the bottom
@@ -423,21 +488,42 @@ $('body').tooltip({
         $('.chat-box-conversation-content').attr({'cid': data.cid});
         $('.chat-box-conversation-content').html('');
 
-        $.each(data.history, (key, value) => {
-          let date = new Date(parseInt(value['date']));
-          let from = value['pid'], isyou = (value['pid'] == localStorage.getItem('playerid')?' you':''), dayhr = '';
-          let last_msg = $('.chat-box-conversation-content .chat-msg-content').last();
-          let last_pid = last_msg.attr('pid');let last_date = last_msg.attr('date');
-          if ((last_pid != value['pid'] || last_pid === undefined) && (isyou != ' you')) froms = '<div class="chat-msg-nick">'+value['nickname']+' says:</div>'; else froms = '';
+        if (data.cid == 0) {
 
-          $('.chat-box-chatter-lastmsg[cid=0]').html((isyou == ' you'?'You: ':'')+value['msg'])
+          $.each(data.history, (key, value) => {
+            let date = new Date(parseInt(value['date']));
+            let from = value['pid'], isyou = (value['pid'] == localStorage.getItem('playerid')?' you':''), dayhr = '';
+            let last_pid = $('.chat-box-conversation-content[cid=0] .chat-msg-content').last().attr('pid');
+            if ((last_pid != value['pid'] || last_pid === undefined) && (isyou != ' you')) froms = '<div class="chat-msg-nick">'+value['nickname']+' says:</div>'; else froms = '';
 
-          let h = (date.getHours() <= 9)?'0'+date.getHours():date.getHours();
-          let i = (date.getMinutes() <= 9)?'0'+date.getMinutes():date.getMinutes();
+            $('.chat-box-chatter-lastmsg[cid=0]').html((isyou == ' you'?'You: ':'')+value['msg'])
 
-          $('.chat-box-conversation-content').append('<div class="chat-msg-content" pid="'+from+'" date="'+value['date']+'">'+whenMsgWasSent(value['date'])+froms+'<div class="chat-msg'+isyou+'" rel="tooltip" title="'+h+':'+i+'" rel="tooltip"><span href="#">'+value['msg']+'</span></div><div style="clear: both"></div></div>');
+            let h = (date.getHours() <= 9)?'0'+date.getHours():date.getHours();
+            let i = (date.getMinutes() <= 9)?'0'+date.getMinutes():date.getMinutes();
 
-        });
+            $('.chat-box-conversation-content').append('<div class="chat-msg-content" pid="'+from+'" date="'+value['date']+'">'+whenMsgWasSent(value['date'])+froms+'<div class="chat-msg'+isyou+'" rel="tooltip" title="'+h+':'+i+'" rel="tooltip"><span href="#">'+value['msg']+'</span></div><div style="clear: both"></div></div>');
+
+          });
+
+        } else {
+
+          let unreadCounter = 0;
+
+          $.each(data.history, (key, value) => {
+            let date = new Date(parseInt(value['date']));
+            let unread = (!isNaN(value['unread']) && value['unread'] == true)?' unread-msg':''; if (unread == ' unread-msg') unreadCounter++;
+            let you = value['you'], isyou = (you)?' you':'';
+            $('.chat-box-chatter-lastmsg[cid='+data.cid+']').html(((isyou)?'You: ':'')+value['msg'])
+
+            let h = (date.getHours() <= 9)?'0'+date.getHours():date.getHours();
+            let i = (date.getMinutes() <= 9)?'0'+date.getMinutes():date.getMinutes();
+
+            $('.chat-box-conversation-content[cid='+data.cid+']').append('<div class="chat-msg-content" date="'+value['date']+'">'+whenMsgWasSent(value['date'])+'<div class="chat-msg'+isyou+unread+'" rel="tooltip" title="'+h+':'+i+'" rel="tooltip"><span href="#">'+value['msg']+'</span></div><div style="clear: both"></div></div>');
+          });
+
+          if (unreadCounter != 0) msgHasBeenRead(data.cid);
+
+        }
 
         scrollBottomSChat()
 
@@ -611,7 +697,7 @@ $('body').tooltip({
 
       // Friend request accepted
       socket.on('friend request accepted', (data) => {
-        $('.social-content-friend-list').prepend('<div class="social-content-sub social-hover" pid="'+data.pid+'" status="'+data.socialstatus+'"><div class="social-friend"><div class="social-friend-icon"><img class="status-'+data.socialstatus+'" src="../assets/imgs/profileicon/'+data.iconid+'.png"/></div><div class="social-friend-info"><div class="social-friend-nick"><span><b>'+data.nickname+'</b></span></div><div class="social-friend-description"></div></div><div style="clear: both"></div></div></div>');
+        $('.social-content-friend-list').prepend('<div class="social-content-sub social-hover" pid="'+data.pid+'" status="'+data.socialstatus+'"><div class="social-friend"><div class="social-friend-icon"><span class="chat-box-newmsg badge badge-warning profile" pid="'+data.pid+'" data-new="0"></span><img class="status-'+data.socialstatus+'" src="../assets/imgs/profileicon/'+data.iconid+'.png"/></div><div class="social-friend-info"><div class="social-friend-nick"><span><b>'+data.nickname+'</b></span></div><div class="social-friend-description"></div></div><div style="clear: both"></div></div></div>');
         updateDesc(data.pid, data.socialstatus, data.description)
         if ($('.social-content-friend-list .social-content-sub').length > 0) $('.social-content-no-friends').hide();
         $('.your-friend-requests div.friend-req[pid='+data.pid+']').remove();
@@ -623,7 +709,7 @@ $('body').tooltip({
 
       // Load friends list
       socket.on('load friends res', (data) => {
-        $('.social-content-friend-list').prepend('<div class="social-content-sub social-hover" pid="'+data.pid+'" status="'+data.socialstatus+'"><div class="social-friend"><div class="social-friend-icon"><img class="status-'+data.socialstatus+'" src="../assets/imgs/profileicon/'+data.iconid+'.png"/></div><div class="social-friend-info"><div class="social-friend-nick"><span><b>'+data.nickname+'</b></span></div><div class="social-friend-description"></div></div><div style="clear: both"></div></div></div>');
+        $('.social-content-friend-list').prepend('<div class="social-content-sub social-hover" pid="'+data.pid+'" status="'+data.socialstatus+'"><div class="social-friend"><div class="social-friend-icon"><span class="chat-box-newmsg badge badge-warning profile" pid="'+data.pid+'" data-new="0"></span><img class="status-'+data.socialstatus+'" src="../assets/imgs/profileicon/'+data.iconid+'.png"/></div><div class="social-friend-info"><div class="social-friend-nick"><span><b>'+data.nickname+'</b></span></div><div class="social-friend-description"></div></div><div style="clear: both"></div></div></div>');
         updateDesc(data.pid, data.socialstatus, data.description)
         if ($('.social-content-friend-list .social-content-sub').length > 0) $('.social-content-no-friends').hide();
       })
