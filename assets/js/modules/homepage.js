@@ -179,6 +179,8 @@ $('body').tooltip({
           $('.chat-box').animate({'height': '50vh'}, "slow");
           $('.chat-box-controls').off('click');
           $('.chat-box-controls').css({'cursor': 'default'});
+          let pid = $('.chat-box-conversation-content').attr('cid');
+          if ($('.chat-box-newmsg.profile[pid='+ pid +']').attr('data-newmsgs') == "true") msgHasBeenRead(pid, false);
           scrollBottomSChat();
         }
       })
@@ -238,7 +240,7 @@ $('body').tooltip({
         })
 
         if (cid == 0) {
-          updateChatTitle('Public Chat')
+          socket.emit('online users request');
         } else {let nick = $('.social-content-sub[pid='+cid+'] .social-friend-nick span b').text();updateChatTitle(nick)}
       }
 
@@ -246,7 +248,7 @@ $('body').tooltip({
         $('.chat-box-title').html('<b>'+type+'</b>'+'<i>'+others+'</i>')
       }
 
-      function addNewChatter(cid, newmsg=false, lastmsg=null) {
+      function addNewChatter(cid, newmsg=false, lastmsg='No messages yet!') {
         $('.chat-box-conversation-content').html('');
 
         let img = $('.social-content-sub[pid='+cid+'] .social-friend-icon img').attr('src');
@@ -312,7 +314,7 @@ $('body').tooltip({
         loadSocialMessages(pid);
         $('.chat-box-chats-chatter').removeAttr('data-selected');
         $('.chat-box-chats-chatter[cid='+pid+']').attr({'data-selected': 'true'});
-        if (pid == 0) updateChatTitle('Public Chat'); else updateChatTitle(nick);
+        if (pid == 0) socket.emit('online users request'); else updateChatTitle(nick);
       });
 
       function closeChat() {
@@ -398,44 +400,64 @@ $('body').tooltip({
       function newMsgNotify(pid, from) {
         if (from != localStorage.getItem('playerid')) {
 
-        let newmsgs = parseInt($('.chat-box-newmsg.profile[pid='+pid+']').attr('data-new')); newmsgs++;
+          let newmsgs = parseInt($('.chat-box-newmsg.profile[pid='+pid+']').attr('data-new')); newmsgs++;
 
-        $('.chat-box-newmsg[cid='+pid+']').text(newmsgs+' new')
-        $('.chat-box-newmsg[cid='+pid+']').animate({'opacity': 1}, 800)
-        $('.chat-box-newmsg.profile[pid='+pid+']').attr('data-new', newmsgs)
-        $('.chat-box-newmsg.profile[pid='+pid+']').attr('data-newmsgs', true)
-        $('.chat-box-newmsg.profile[pid='+pid+']').text(newmsgs+' new')
-        $('.chat-box-newmsg.profile[pid='+pid+']').animate({'opacity': 1}, 800)
+          $('.chat-box-newmsg[cid='+pid+']').text(newmsgs+' new')
+          $('.chat-box-newmsg[cid='+pid+']').animate({'opacity': 1}, 800)
+          $('.chat-box-newmsg.profile[pid='+pid+']').attr('data-new', newmsgs)
+          $('.chat-box-newmsg.profile[pid='+pid+']').attr('data-newmsgs', true)
+          $('.chat-box-newmsg.profile[pid='+pid+']').text(newmsgs+' new')
+          $('.chat-box-newmsg.profile[pid='+pid+']').animate({'opacity': 1}, 800)
 
-        $('.notification-badge.chats').text($('.social-content-friend-list .chat-box-newmsg.profile[data-newmsgs=true]').length+' new').animate({'opacity': 1}, 400);
+          let newchattersmsgs = $('.social-content-friend-list .chat-box-newmsg.profile[data-newmsgs=true]').length;
+          $('.notification-badge.chats').text(newchattersmsgs+' new').animate({'opacity': 1}, 400);
+          document.title = '('+newchattersmsgs+')'+' League of Oldschool';
+
+          if (($('.chat-box-chats-chatter[cid='+pid+']').attr('data-selected') == 'true') && ($('.chat-box').height() < 100)) {
+            $('.chat-box-title i').text(newmsgs+' new message'+((newmsgs > 1)?'s':''))
+            $('.chat-box-title i').animate({'opacity': 1}, 'slow')
+          }
         }
       }
 
       // Mark as read MSG
-      function msgHasBeenRead(pid) {
+      function msgHasBeenRead(pid, nmsg=false) {
 
-        $('.chat-box-newmsg[cid='+pid+']').animate({'opacity': 0}, 800, function() {
-          $('.chat-box-newmsg[cid='+pid+']').text('')
-        })
-        $('.chat-box-newmsg.profile[pid='+pid+']').attr('data-new', 0)
-        $('.chat-box-newmsg.profile[pid='+pid+']').attr('data-newmsgs', false)
-        $('.chat-box-newmsg.profile[pid='+pid+']').animate({'opacity': 0}, 800, function() {
-          $('.chat-box-newmsg.profile[pid='+pid+']').text('')
-        })
+        if(!nmsg) {
+          $('.chat-box-newmsg[cid='+pid+']').animate({'opacity': 0}, 800, function() {
+            $('.chat-box-newmsg[cid='+pid+']').text('')
+          })
+          $('.chat-box-newmsg.profile[pid='+pid+']').attr('data-new', 0)
+          $('.chat-box-newmsg.profile[pid='+pid+']').attr('data-newmsgs', false)
+          $('.chat-box-newmsg.profile[pid='+pid+']').animate({'opacity': 0}, 800, function() {
+            $('.chat-box-newmsg.profile[pid='+pid+']').text('')
+          })
 
+          $('.chat-box-title i').animate({'opacity': 0}, 'slow', function() {
+            $('.chat-box-title i').text('');
+          });
 
-        let unReads = $('.social-content-friend-list .chat-box-newmsg.profile[data-newmsgs=true]').length;
-        $('.notification-badge.chats').text(unReads+' new');
-        if (unReads > 0) $('.notification-badge.chats').animate({'opacity': 1}, 400); else $('.notification-badge.chats').animate({'opacity': 0}, 400);
+          let unReads = $('.social-content-friend-list .chat-box-newmsg.profile[data-newmsgs=true]').length;
+          $('.notification-badge.chats').text(unReads+' new');
+          document.title = '('+unReads+')'+' League of Oldschool';
+          if (unReads > 0) $('.notification-badge.chats').animate({'opacity': 1}, 400); else {
+            document.title = 'League of Oldschool';
+            $('.notification-badge.chats').animate({'opacity': 0}, 400);
+          }
 
-        setTimeout(() => {
-          $('.chat-box-conversation-content[cid='+pid+'] .chat-msg.unread-msg').css({'border': '1px solid rgba(100, 100, 100, 0.6)'});
           setTimeout(() => {
-            $('.chat-box-conversation-content[cid='+pid+'] div.chat-msg').removeClass('unread-msg');
-          }, 3100)
-        }, 5000)
+            $('.chat-box-conversation-content[cid='+pid+'] .chat-msg.unread-msg').css({'border': '1px solid rgba(100, 100, 100, 0.6)'});
+            setTimeout(() => {
+              $('.chat-box-conversation-content[cid='+pid+'] div.chat-msg').removeClass('unread-msg');
+            }, 3100)
+          }, 5000)
 
-        socket.emit('mark messages as read', {'pid': pid})
+
+        }
+
+        let specify = (!nmsg)?false:true;
+        socket.emit('mark messages as read', {'pid': pid, 'specify': specify})
+
 
       }
 
@@ -443,7 +465,7 @@ $('body').tooltip({
       socket.on('new message', data => {
         var last_msg = $('.chat-box-conversation-content[cid='+data.cid+'] .chat-msg-content').last();
         var last_pid = last_msg.attr('pid');
-        var from = '', isyou = '';
+        var from = '', isyou = '', read = false;
 
         if ((last_pid != data.from || last_pid === undefined) && data.cid == 0 ) from = '<div class="chat-msg-nick">'+data.fromnick+' says:</div>';
         if (localStorage.getItem('playerid') == data.from) {isyou = ' you';from = ''}
@@ -451,7 +473,8 @@ $('body').tooltip({
 
         if (data.cid != 0) {
           if (!($('.chat-box-chats-chatter[cid='+data.cid+']').length > 0) && data.cid != localStorage.getItem('playerid')) addNewChatter(data.cid, true);
-          newMsgNotify(data.cid, data.from, (isyou == ' you'?'You: ':'')+data.msg);
+          if (($('.chat-box-chats-chatter[cid='+data.cid+']').attr('data-selected') != 'true') ||
+          ($('.chat-box-chats-chatter[cid='+data.cid+']').attr('data-selected') == 'true' && $('.chat-box').height() < 100) ) newMsgNotify(data.cid, data.from, (isyou == ' you'?'You: ':'')+data.msg); else read = true;
         }
 
         let date = new Date();
@@ -469,6 +492,8 @@ $('body').tooltip({
             $('.chat-box-conversation-content[cid='+data.cid+'] .chat-msg-content').first().prepend(whenMsgWasSent(mili, true));
           }
         }
+
+        if (read && (data.from == data.cid)) msgHasBeenRead(data.from, true);
 
       });
 
@@ -791,6 +816,11 @@ $('body').tooltip({
           sel_img.addClass('chat-box-chatter-img status-'+status);
         }
       }
+
+    // Online players on global chat show
+      socket.on('online users', data => {
+        if ($('.chat-box-chats-chatter[cid=0]').attr('data-selected') == 'true') updateChatTitle('Public Chat - ('+data.loggedin+' logged in / '+data.online+' online) ')
+      })
 
     // contextMenu
       $(function() {

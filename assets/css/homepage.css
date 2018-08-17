@@ -680,3 +680,21 @@ img.status-0 {
 .notification-badge.chats {
   left: 145px;
 }
+
+.chat-box-title i {
+  margin-left: 5px;
+  padding: 0px 9px 3.5px 8px;
+  color: #cec25f;
+  border: 1px solid #cec25f;
+  border-radius: 10px;
+  font-size: 13px;
+  opacity: 0;
+}
+
+
+@media only screen and (height: 576px)  {
+  .chat-box-title i {
+    padding: 0px 9px 2.5px 8px;
+    font-size: 12px;
+  }
+}
