@@ -1,5 +1,6 @@
 <div class="client-alerts"></div>
 <div class="setup"></div>
+<div class="loader"><img src="../assets/imgs/highloading.svg" /></div>
 <div class="confirm_action modal fade">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -115,7 +116,7 @@
 <div class="client-menu">
   <div class="client-menu-sub">
     <div class="client-menu-left">
-      <button class="client-menu-playbtn client-menu-btn">PLAY</button>
+      <button class="client-menu-playbtn client-menu-btn" data-selected="false">PLAY</button>
       <div style="clear: both"></div>
     </div>
     <div class="client-menu-right">
@@ -124,9 +125,20 @@
       <div style="clear: both"></div>
     </div>
   </div>
+  <div class="client-menu-play-sub">
+    <div class="client-menu-play-modes">
+      <div class="client-menu-play-left">
+        <button class="client-menu-play-classic client-menu-mode-btn">Classic 5x5</button>
+        <button class="client-menu-play-aram client-menu-mode-btn">Aram 3x3</button>
+      </div>
+      <div class="client-menu-play-right">
+        <button class="client-menu-play-custom client-menu-mode-btn">Custom games</button>
+      </div>
+    </div>
+  </div>
 </div>
 <div class="homepage">
-
+  <!-- <iframe src="http://iclyde.ddns.net/oldSchoolLeague/news.html" class="remote-homepage"></iframe> -->
 </div>
 <div class="chat-box">
   <div class="chat-box-controls">

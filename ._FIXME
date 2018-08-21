@@ -1,2 +1,4 @@
 TODO:
-1. Rejestracja - dodać captche 
+1. Rejestracja - dodać captche
+2. Powiadomienia po zmianie wysokości headera niepoprawnie się wyświetlają (za wysoko) w mniejszych rozdzielczościach
+3. Przeciąganie tekstu wyłączenie tej możliwości

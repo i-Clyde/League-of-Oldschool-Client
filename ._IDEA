@@ -1,0 +1,99 @@
+Stage 2:
+  - Custom games functionality
+    - Custom games list (html&css)
+    - Add new custom game button
+      - Add creator of custom games
+        - Change description to (creating custom game)
+        @- Map
+        @- Title
+        @- Password
+        @- Champion select type (Blind, draft (optional: random))
+        @- Max players for each team
+        @- Cheats (on/off)
+        @- Minions (on/off)
+        @- Cooldowns (on/off)
+        @- (@secret (for key))
+    - Display existing custom games
+      - Display list with:
+        @- If password show padlock
+        @- Title
+        @- Map
+        @- Who created game
+        @- Number of players in lobby / Max
+    - Add possibility to joining games
+      - If password ask for it
+    - Lobby room
+      - Design
+        - Title
+        - Info
+          - Map
+          - N x N (5x5etc)
+        - Private Chat
+        - Two tabels for team select (max 6 in team)
+        - Invate list
+        - (King)
+        - Options
+          - Allow to invite
+          - Remove
+          - Start game
+      - Possibilities to Invite friends
+      - After everyone leaves remove room (ask last person for confirm)
+      - After king leave random person getting his permissions
+      - If in lobby after clicking PLAY (will change name to IN LOBBY) back to lobby
+      - After START GAME (!)
+        - Open champion select (hide top bar menu)
+        - Block any possibilities to leave
+        - Allow to leave without restrict
+        - Leave lobby chat and join LOBBYCHAT-b/p (blue - for blue team / purple for purple team)
+        - Join to champion select room for events like your turn.
+    - Champion select
+      - In custom
+        - Always first pick is on blue side
+        - If 6x6 change height of summoner section
+      - In verified modes
+        - Add restrict if someone left champion select (5 minutes for every dodge) [you need to wait X minutes for login if you dismiss you have to wait again from the beginning]
+        - Hide enemy nicknames
+      - MODE: Normal
+        - Load
+          - Show from left and right summoners section
+          - Show text BLUE VS PURPLE
+          - Show map name
+          - Show type
+          - Show champions
+          - Start timer 70 seconds
+        - In select phase
+          - Everyone picking in the same time
+          - After lock in, Unselect this champion for everyone who selected him in his team and disable and grey
+          - Show who's still picking in enemy team but not champion
+          - If everyone pick before (timer end) - stop select phase timer and start leyout phase timer 15 seconds
+          - In leyout phase timer show enemy champions
+          - after leyout phase timer end - block change possibilities and start 5 seconds ('get ready' timer)
+            - In Get Ready timer
+              - Prepare settings
+              - Create game.json
+              - Run server with game.json config
+          - After 5 seconds timer
+            - Send to everyone command to run league of legends with special code
+            - Add to database game info with game code
+        - "Block" client functionality and wait for game end emit
+          - If someone will try to relog detect that and display reconnect button (if possible detect if league of legends is running if yes display "in game")
+      - MODE: Draft
+      - MODE: Random
+  - Verified modes:
+    - Draft 5x5
+    - Blind 3x3
+    - Aram 3x3
+      - Rules on click the mode
+        - Change description (in queue - blue and add timer)
+        - Show new info box in right corner a little above
+          - In this info box
+            - Timer: time in queue
+            - Type of queue
+            - X button to leave
+            - Players in queue in this time
+        - After get enough players 10 or 6
+          - Show confirm box (wait 10 seconds)
+          - If everyone accept create champion select and randomize their summoner id
+          - If not everyone accept
+            - Kick player who didn't and restart the queue
+              - If premades kick all premades

@@ -28,6 +28,9 @@ input, button, textarea, :focus {
 .modal {
   overflow: hidden !important;
 }
+img {
+  pointer-events: none;
+}
 
 .termsofuse_modal .termsofuse_text {
   background-color: rgba(20, 20, 20, 0.6);
@@ -180,7 +183,7 @@ input, button, textarea, :focus {
   float: right;
 }
 #login-page {
-  background-image: url("../imgs/loginBG.jpg");
+  background: url("../imgs/loginBG.jpg");
   background-size: cover;height: 100vh;
   z-index: 10;
 }

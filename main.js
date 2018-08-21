@@ -28,7 +28,10 @@ function createWindow (path, nn = null) {
     center: true,
     setMaximizable: false,
     setFullScreenable: false,
-    icon: __dirname + '/assets/icons/win/icon.ico'
+    icon: __dirname + '/assets/icons/win/icon.ico',
+    webPreferences: {
+      experimentalFeatures: true
+    }
   })
 
   win.setResizable(false)

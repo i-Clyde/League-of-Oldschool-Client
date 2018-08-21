@@ -250,16 +250,16 @@
         localStorage.setItem('friendsid', res.friendsid);
         localStorage.setItem('token', res.socketToken);
 
-      setTimeout(function() {
         $('#main-client').append('<div id="home-page"></div>');
         $('head').append('<link rel="stylesheet" href="../assets/css/homepage.css" />');
 
         $('#home-page').load('./unique/homepage.html', function(){
+          $('.loader').show();
+          $('.loader').animate({'opacity': 1}, 600);
           $(document, '#home-page').ready(function(){
             $('#home-page').animate({'opacity': "1"}, "slow");
           })
         });
-      }, 1500)
 
     } else if (res.status === 'error') {
       $('#login-input, #password-input, #remember-input').removeAttr('disabled');

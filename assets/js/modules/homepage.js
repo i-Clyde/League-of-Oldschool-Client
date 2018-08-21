@@ -1,10 +1,27 @@
 // Errors, success alerts
-function success_msg(msg) {
-  $('<div class="alerts success">' + msg + '</div>').appendTo('.client-alerts');
-  $('.alerts.success').animate({'opacity': '1'}, 'slow').delay(7000).fadeOut('slow', function(){
-    $(this).remove();
+function custom_alert(msg, type, time) {
+  $('<div class="alerts '+type+'">' + msg + '</div>').appendTo('.client-alerts');
+
+  var i = 0;
+  var rI = setInterval(() => { i++;
+    if (i <= 15) $('.alerts.'+type).css({'backdrop-filter': 'blur('+i+'px)'});
+    if (i == 16) clearInterval(rI);
+  }, 40);
+
+  $('.alerts.'+type).animate({'opacity': '1'}, 640, function() {
+    setTimeout(() => {
+    var rI = setInterval(() => { i--;
+      if (i > 0) $('.alerts.'+type).css({'backdrop-filter': 'blur('+i+'px)'});
+      if (i == -1) clearInterval(rI);
+    }, 40);
+      $(this).fadeOut(640, function() {
+        $(this).remove();
+      });
+    }, time)
   });
 }
+
+function success_msg(msg) {custom_alert(msg, 'success', 7000)}
 function info_msg(msg) {
   $('<div class="alerts info">' + msg + '</div>').appendTo('.client-alerts');
   $('.alerts.info').animate({'opacity': '1'}, 'slow').delay(9000).fadeOut('slow', function(){
@@ -70,12 +87,16 @@ $('body').tooltip({
         $('.chat-box-chatter-lastmsg[cid=0]').html(((data.lastGMSG.pid == localStorage.getItem('playerid'))?'You: ':'')+data.lastGMSG.msg)
 
         $.each(data.messageHistory, function(index) {
-          for(let i = 0, len = data.messageHistory[index].length; i < len; i++) {
-            if (i == 0) addNewChatter(index, true, 'No messages yet!');
-            if (!isNaN(data.messageHistory[index][i].unread) && data.messageHistory[index][i].unread == true) newMsgNotify(index, index)
-            if (i == len-1) $('.chat-box-chatter-lastmsg[cid='+index+']').html((((data.messageHistory[index][i].you)?'You: ':'')+data.messageHistory[index][i].msg));
+          if (localStorage.getItem('friendsid').includes(index)) {
+            for(let i = 0, len = data.messageHistory[index].length; i < len; i++) {
+              if (i == 0) addNewChatter(index, true, 'No messages yet!');
+              if (!isNaN(data.messageHistory[index][i].unread) && data.messageHistory[index][i].unread == true) newMsgNotify(index, index, true)
+              if (i == len-1) $('.chat-box-chatter-lastmsg[cid='+index+']').html((((data.messageHistory[index][i].you)?'You: ':'')+data.messageHistory[index][i].msg));
+            }
           }
         })
+
+        startHomepage();
       })
 
       // Description changer (your)
@@ -163,10 +184,17 @@ $('body').tooltip({
       })
 
       // Show panels
-      $('.social-type-friends').animate({'left': '0', 'opacity': '1'}, 400)
-      $('.social-zone').animate({'left': '0', 'opacity': '1'}, 400, function() {
-        $('.client-menu').animate({'top': '0', 'opacity': '1'}, 600)
-      })
+      function startHomepage() {
+        setTimeout(() => {
+          $('.social-type-friends').animate({'left': '0', 'opacity': '1'}, 400)
+          $('.social-zone').animate({'left': '0', 'opacity': '1'}, 400)
+          $('.client-menu').animate({'top': '0', 'opacity': '1'}, 400, () => {$('.homepage').animate({'opacity': 1}, 600)})
+        }, 500)
+        $('.loader').animate({'opacity': 0}, 200, () => {
+          $('.loader').hide();
+        })
+      }
+
 
       // Handle home on clicks
       $('.chat-box-control-minimize').on('click', function() {
@@ -397,7 +425,7 @@ $('body').tooltip({
       }
 
       // Add new message notifi
-      function newMsgNotify(pid, from) {
+      function newMsgNotify(pid, from, preloader=false) {
         if (from != localStorage.getItem('playerid')) {
 
           let newmsgs = parseInt($('.chat-box-newmsg.profile[pid='+pid+']').attr('data-new')); newmsgs++;
@@ -410,7 +438,7 @@ $('body').tooltip({
           $('.chat-box-newmsg.profile[pid='+pid+']').animate({'opacity': 1}, 800)
 
           let newchattersmsgs = $('.social-content-friend-list .chat-box-newmsg.profile[data-newmsgs=true]').length;
-          $('.notification-badge.chats').text(newchattersmsgs+' new').animate({'opacity': 1}, 400);
+          setTimeout(() => {$('.notification-badge.chats').text(newchattersmsgs+' new').animate({'opacity': 1}, 400)}, ((preloader)?800:0))
           document.title = '('+newchattersmsgs+')'+' League of Oldschool';
 
           if (($('.chat-box-chats-chatter[cid='+pid+']').attr('data-selected') == 'true') && ($('.chat-box').height() < 100)) {
@@ -821,6 +849,80 @@ $('body').tooltip({
       socket.on('online users', data => {
         if ($('.chat-box-chats-chatter[cid=0]').attr('data-selected') == 'true') updateChatTitle('Public Chat - ('+data.loggedin+' logged in / '+data.online+' online) ')
       })
+
+    // Remote homepage
+      // $(function() {
+      //   setTimeout(() => {
+      //     $('.remote-homepage').contents().find('span.nickname').html(localStorage.getItem('nickname'));
+      //   }, 500)
+      // })
+
+    // Homepage menu
+        $('button.client-menu-playbtn').on('click', function(x) {
+          if (($('.client-menu-playbtn').attr('data-selected') == 'false') && (($('.client-menu-play-modes').height() == 0) || ($('.client-menu-play-sub').css('display') == 'none') )) {
+            $('.client-menu-playbtn').attr({'data-selected': 'true'});
+            $('.client-menu-play-sub').toggle(1, function() {
+              $('.client-menu-play-modes').animate({'height': '38px'}, 400, function() {
+                $('.client-menu-mode-btn').show();
+                $('.client-menu-mode-btn').animate({'opacity': '1'}, 400);
+              });
+            });
+          } else if (($('.client-menu-playbtn').attr('data-selected') == 'true') && (($('.client-menu-play-modes').height() == 38) || ($('.client-menu-play-sub').css('display') == 'block') )) {
+            $('.client-menu-mode-btn').animate({'opacity': 0}, 300, () => {
+              $('.client-menu-play-modes').animate({'height': '0px'}, 400, () => {
+                $('.client-menu-play-modes').css({'height': '0px'})
+                $('.client-menu-mode-btn').hide();
+                $('.client-menu-play-sub').hide();
+                $('.client-menu-playbtn').attr({'data-selected': 'false'});
+              });
+            });
+          }
+          // $('.client-menu-playbtn').removeAttr('data-selected');
+
+        })
+
+      function customGamesList() {
+        $('.client-menu-play-custom').one('click', () => {
+          $('.loader').show().animate({'opacity': 1}, 200)
+          if ($('.client-menu-play-modes').height() != 0) {
+            $('.client-menu-mode-btn').animate({'opacity': 0}, 'slow', () => {
+              $('.client-menu-play-modes').animate({'height': '0%'}, 400, () => {
+                $('.client-menu-play-sub').hide();
+                $('section[name=customGames]').animate({'opacity': 1});
+                $('.loader').animate({'opacity': 0}, 200, () => {
+                  $('.loader').hide();
+                })
+              });
+              $('.client-menu-mode-btn').hide();
+            });
+            $('.client-menu-playbtn').attr({'data-selected': 'false'});
+
+            $('.client-menu-play-custom').css({'background-color': 'rgba(255, 255, 255, 0.1)', 'cursor': 'not-allowed', 'color': 'rgba(255, 255, 255, 0.8)'});
+            $('.client-menu-play-custom').off('click');
+
+            $( ".homepage" ).load( "models/customs.html", function() {
+
+              $('button.close-customs-btn').on('click', () => {
+                $('.client-menu-play-custom').css({'background-color': '', 'cursor': 'pointer', 'color': 'white'});
+                $('section[name=customGames]').animate({'opacity': 0}, () => {
+                  $('section[name=customGames]').remove();
+                })
+                customGamesList();
+              })
+
+              $('.cG-enter-fastcode').on('click', function() {$('.joinviafastcodemodal').appendTo("body").modal()});
+              $('.joinviafastcodemodal').on('shown.bs.modal', function() {$(this).find('#cG_join_via_fastcode_input').focus()});
+
+              $('.cG-create-new-room').on('click', function() {
+                $('.cG-customs').fadeOut(500, () => {$('.cG-customs').hide();$('.cG-create-new-game').fadeIn(800)});
+                $('.back-to-customs-btn').on('click', () => {
+                  $('.cG-create-new-game').fadeOut(500, () => {$('.cG-create-new-game').hide();$('.cG-customs').fadeIn(800)});
+                })
+              })
+            });
+          }
+        })
+      } customGamesList();
 
     // contextMenu
       $(function() {

@@ -249,7 +249,7 @@
   position: absolute;
   width: calc(100% - 270px);
   margin-left: 270px;
-  height: calc(10vh - 2px);
+  height: 89.5px;
   top: -10vh;
   background-color: rgba(0, 0, 0, 0.3);
   opacity: 0;
@@ -258,7 +258,7 @@
 
 .client-menu .client-menu-sub {
   position: relative;
-  height: 10vh;
+  height: 89.5px;
   width: 100%;
 }
 
@@ -272,8 +272,8 @@
 }
 
 .client-menu .client-menu-sub .client-menu-btn {
-  height: 10vh;
-  line-height: 10vh;
+  height: 89.5px;
+  line-height: 89.5px;
   padding: 0px 20px;
   background: inherit;
   border: none;
@@ -284,6 +284,11 @@
 
 .client-menu .client-menu-sub .client-menu-playbtn {
   padding: 0px 30px;
+  transition: background-color 0.3s;
+}
+
+.client-menu .client-menu-sub .client-menu-playbtn[data-selected=true] {
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 .client-menu .client-menu-sub .client-menu-btn:hover {
@@ -298,6 +303,45 @@
   color: rgba(255, 255, 255, 1);
 }
 
+.client-menu .client-menu-play-sub {
+  position: relative;
+  width: 100%;
+  height: 38px;
+  display: none;
+}
+
+.client-menu .client-menu-play-modes {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.4);
+  width: 100%;
+  height: 0%;
+}
+
+.client-menu .client-menu-mode-btn {
+  display: none;
+  opacity: 0;
+  background: 0;
+  border: 0;
+  color: white;
+  height: 38px;
+}
+
+.client-menu .client-menu-mode-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+}
+
+.client-menu .client-menu-mode-btn:active {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.client-menu .client-menu-play-left {
+  float: left;
+}
+.client-menu .client-menu-play-right {
+  float: right;
+}
+
 .chat-box {
   position: absolute;
   left: 270px;
@@ -305,6 +349,7 @@
   height: 4.9vh;
   width: 0;
   background-color: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(3px);
 }
 
 .chat-box-controls {
@@ -697,4 +742,308 @@ img.status-0 {
     padding: 0px 9px 2.5px 8px;
     font-size: 12px;
   }
+}
+
+.client-menu-homepagebtn {
+  margin-right: 65px;
+}
+
+.homepage {
+  margin-left: 270px;
+  margin-top: calc(10vh - 2px);
+  opacity: 0;
+}
+
+.homepage section[name=customGames] {
+  opacity: 0;
+  /* position: relative; */
+}
+
+.homepage iframe {
+  border: 0;
+  height: calc(90vh + 2px);
+  width: 100%;
+  overflow: hidden;
+}
+
+.loader {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  display: none;
+}
+
+@media (width: 1600px) {
+  section[name=customGames] .container {
+    max-width: 1280px !important;
+    padding-top: 1.5rem !important;
+  }
+
+  section[name=customGames] .cG-lobby-list {
+    height: 86vh;
+  }
+
+  section[name=customGames] tbody {
+    height: 82vh;
+  }
+
+  section[name=customGames] tr th:nth-child(1) {width: 4.3%}
+  section[name=customGames] tr th:nth-child(3) {width: 15%}
+  section[name=customGames] tr th:nth-child(4) {width: 9.2%}
+  section[name=customGames] tr th:nth-child(5) {width: 20%}
+
+  section[name=customGames] tr td:nth-child(1) {width: 4.3%}
+  section[name=customGames] tr td:nth-child(3) {width: 15%}
+  section[name=customGames] tr td:nth-child(4) {width: 9%}
+  section[name=customGames] tr td:nth-child(5) {width: 20.9%}
+
+  section[name=customGames] .cGC-map-span {top: 210px !important;width: 489px !important}
+  section[name=customGames] img.cGC-map-img {width: 493px !important}
+}
+
+@media (width: 1280px) {
+  section[name=customGames] .container {
+    max-width: 965px !important;
+    padding-top: 2.55rem !important;
+  }
+
+  section[name=customGames] .cG-lobby-list {
+    height: 83vh;
+  }
+
+  section[name=customGames] tbody {
+    height: 78vh;
+  }
+
+  section[name=customGames] tr th:nth-child(1) {width: 5.5%}
+  section[name=customGames] tr th:nth-child(3) {width: 21%}
+  section[name=customGames] tr th:nth-child(4) {width: 12.3%}
+  section[name=customGames] tr th:nth-child(5) {width: 17%}
+
+  section[name=customGames] tr td:nth-child(1) {width: 5.7%}
+  section[name=customGames] tr td:nth-child(3) {width: 20.9%}
+  section[name=customGames] tr td:nth-child(4) {width: 12.1%}
+  section[name=customGames] tr td:nth-child(5) {width: 18.2%}
+
+  section[name=customGames] .cGC-map-span {top: 135px !important;width: 331px !important}
+  section[name=customGames] img.cGC-map-img {width: 335px !important}
+}
+
+@media (width: 1024px) {
+  section[name=customGames] .container {
+    max-width: 735px !important;
+    padding-top: 2.9rem !important;
+  }
+
+  section[name=customGames] .cG-lobby-list {
+    height: 79vh;
+  }
+
+  section[name=customGames] .cG-options {
+    padding: 9px 0px 0px 15px !important;
+  }
+
+  section[name=customGames] tbody {
+    height: 72vh;
+  }
+
+  section[name=customGames] tr th:nth-child(1) {width: 7.6%}
+  section[name=customGames] tr th:nth-child(3) {width: 18%}
+
+  section[name=customGames] tr th:nth-child(4) {width: 17%}
+  section[name=customGames] tr th:nth-child(5) {width: 22%}
+
+  section[name=customGames] tr td:nth-child(1) {width: 8%}
+  section[name=customGames] tr td:nth-child(3) {width: 17.6%}
+  section[name=customGames] tr td:nth-child(4) {width: 16.8%}
+  section[name=customGames] tr td:nth-child(5) {width: 23.3%}
+
+  section[name=customGames] .cGC-map-span {top: 70px !important;width: 183px !important}
+  section[name=customGames] img.cGC-map-img {width: 187px !important}
+}
+
+section[name=customGames] hr.t-header {
+  margin-top: 0rem !important;
+  margin-bottom: 1rem !important;
+  border-top: 1px solid rgba(153, 129, 0, 0.93) !important;
+}
+
+section[name=customGames] hr.t-table {
+  margin-top: 5px !important;
+  margin-bottom: 2px !important;
+  border-top: 1px solid rgba(153, 129, 0, 0.93) !important;
+}
+
+section[name=customGames] .title {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+section[name=customGames] .cG-options {
+  width: 24%;
+  float: left;
+  padding: 9px 17px 0px 30px;
+}
+
+section[name=customGames] .cG-lobby-list {
+  width: calc(76% - 1px);
+  border-right: 1px solid rgba(153, 129, 0, 0.93);
+  padding-right: 30px;
+  float: left;
+}
+
+section[name=customGames] .cG-sort-by-section th {
+  border-right: 1px solid rgba(153, 129, 0, 0.93);
+  padding-left: 7px;
+  cursor: pointer;
+  transition: background-color, box-shadow 0.3s;
+  white-space: nowrap;
+}
+
+section[name=customGames] td {
+  padding: 5px 0px 5px 6px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+tr td {
+  border-left: 1px solid rgba(0,0,0,0)
+}
+
+section[name=customGames] [cg-room]:hover {
+  transition: background-color 0.3s;
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+section[name=customGames] [cg-room]:active {
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+section[name=customGames] thead, tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+section[name=customGames] thead {
+  width: calc( 100% - 1em )
+}
+
+section[name=customGames] table {
+  width: 400px;
+}
+
+section[name=customGames] tbody {
+  display: block;
+  overflow: auto;
+}
+
+section[name=customGames] .cG-sort-by-section th:hover {
+  background-color: rgba(255, 255, 255, 0.03);
+  box-shadow: 0 0px 0px 5px rgba(255, 255, 255, 0.03);
+}
+
+section[name=customGames] .cG-sort-by-section th:first-child {padding-left: 4px}
+section[name=customGames] td:first-child {padding-left: 4px}
+section[name=customGames] .cG-sort-by-section th:last-child {border-right: 0}
+
+section[name=customGames] .cGC-map-label {position: relative; cursor: pointer; margin-bottom: 10px; margin-left: 10px}
+section[name=customGames] .cGC-map-span {position: absolute;left: 0;top: 120px;width: 493px;text-align: center;backdrop-filter: blur(3px);margin: 0px 2px}
+
+section[name=customGames] .cGC-map-img {filter: grayscale(95%);transition: filter 0.5s}
+section[name=customGames] .cGC-map-label:hover .cGC-map-img {filter: grayscale(0%)}
+
+section[name=customGames] .cGC-map-label > .cGC-map-radio {visibility: hidden;position: absolute}
+section[name=customGames] .cGC-map-label > .cGC-map-radio + .cGC-map-img {border: 2px solid #232323;border-radius: 5px;font-weight: 600}
+section[name=customGames] .cGC-map-label > .cGC-map-radio:checked + .cGC-map-img {border: 2px solid #fff;filter: grayscale(0%);font-weight: 700}
+section[name=customGames] img.cGC-map-img {width: 493px}
+
+.darkput {
+  width: 100%;
+  border-radius: 2px;
+  color: white !important;
+  background-color: rgba(20, 20, 20, 0.9);
+  border: 1px #998100 solid;
+  transition: 0.3s all;
+  padding: 5px 10px;
+}
+
+.darkput:active, .darkput:focus {
+  border: 1px #b7a64c solid !important;
+  background-color: rgba(20, 20, 20, 0.6);
+  -webkit-box-shadow: none;
+}
+
+.darkmit {
+  -webkit-box-shadow: none;
+  width: 100%;
+  background: rgba(20, 20, 20, 0.9);
+  border-radius: 2px;
+  border: 1px #998100 solid;
+  color: rgba(255, 255, 255, 0.9);
+  padding: 5px;
+  margin-top: 10px;
+}
+
+.darkmit:hover {
+  background: rgba(20, 20, 20, 0.7);
+  border: 1px #b7a64c solid;
+  color: rgba(255, 255, 255, 1);
+  cursor: pointer;
+}
+
+.darkmit:disabled {
+  background: rgba(20, 20, 20, 0.6) !important;
+  border: 1px #b7a64c solid;
+  color: rgba(255, 255, 255, 1);
+}
+
+.darkmit:active {background-color: rgba(10, 10, 10, 1) !important}
+.darkmit:disabled:hover {cursor: not-allowed}
+.darkmit:disabled b:hover {cursor: not-allowed}
+
+.darktor {
+  background-color: rgba(35, 35, 35, 0.8) !important;
+  color: #eee !important;
+  border-color: #998100 !important;
+  cursor: pointer;
+  margin-top: .5rem;
+}
+
+.darktor option {
+  border-color: #998100 !important;
+  background-color: rgba(15, 15, 15, 0.8) !important;
+  color: #eee;
+  cursor: pointer;
+}
+
+.darkbox {display: none}
+.custom-darkbox {cursor: pointer;}
+.darkbox-label:hover {color: #fff}
+
+.darkbox-label {
+  padding-left: 5px;
+  font-size: 14px;
+  transition: 0.3s all;
+}
+
+.darkbox-image {
+  margin-bottom: 2px;
+  width: 14px;
+  height: 14px;
+  background: url('../imgs/checkbox.png') no-repeat;
+  position: relative;
+  display: inline-block;
+  vertical-align: text-bottom;
+}
+
+.darkbox:checked + .darkbox-image {
+  background-position: bottom center;
+}
+
+label {
+  margin-bottom: 0;
 }
