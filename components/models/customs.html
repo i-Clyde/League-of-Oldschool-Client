@@ -6,13 +6,38 @@
 
           <div class="row">
             <div class="col">
-              <input type="text" class="darkput input-sm text-center" style="font-weight: 600" maxlength="12" placeholder="Enter your Fastcode" id="cG_join_via_fastcode_input" autofocus>
+              <input type="password" class="darkput input-sm text-center" style="font-weight: 600" maxlength="15" placeholder="Enter your Fastcode" id="cG_join_via_fastcode_input" autofocus>
             </div>
           </div>
 
         </div>
         <div class="modal-footer" style="padding: 15px;padding-top: 5px;">
-          <button type="button" class="btn btn-secondary btn-sm" id="cG_join_via_fastcode_btn"><b>Join</b></button>
+          <button type="button" class="btn btn-secondary btn-sm" id="cG_join_via_fastcode_btn" disabled><b>Join</b></button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="enter-cg-password modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius: 15px">
+        <div class="modal-header">
+          <h5 class="modal-title">This lobby is not public</h5>
+          <button class="close" data-dismiss="modal" aria-hidden="true">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" style="margin-bottom: 0px;padding: 15px;padding-bottom: 5px;">
+
+          <div class="row">
+            <div class="col">
+              <input type="password" class="darkput input-sm text-center" style="font-weight: 600" maxlength="24" placeholder="Enter password" id="cG_join_need_password_input" autofocus>
+            </div>
+          </div>
+
+        </div>
+        <div class="modal-footer" style="padding: 15px;padding-top: 5px;">
+          <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"><b>Cancel</b></button>
+          <button type="button" class="btn btn-secondary btn-sm" id="cG_join_with_password_btn"><b>Enter</b></button>
         </div>
       </div>
     </div>
@@ -36,226 +61,7 @@
             </tr>
             <tr><th colspan="5"><hr class="t-table" /></th></tr>
           </thead>
-          <tbody style="overflow: auto">
-            <!-- <tr cG-no-rooms><td></td><td colspan="4">There is no rooms yet! (You can create one)</td></tr> -->
-            <tr cG-room>
-              <td><i class="fa fa-lock"></i></td>
-              <td>Super fajny i wgl room</td>
-              <td>Summoner's rift</td>
-              <td>5/12</td>
-              <td>iClyde</td>
-            </tr>
-            <tr cG-room>
-              <td><i class="fa fa-unlock"></i></td>
-              <td>Super fajny i wgl room</td>
-              <td>Howling Abbys</td>
-              <td>5/12</td>
-              <td>iClyde</td>
-            </tr>
-            <tr cG-room>
-              <td><i class="fa fa-unlock"></i></td>
-              <td>Super fajny i wgl room</td>
-              <td>Twisted Threeline</td>
-              <td>5/12</td>
-              <td>iClyde</td>
-            </tr>
-            <tr cG-room>
-              <td><i class="fa fa-unlock"></i></td>
-              <td>Super fajny i wgl room</td>
-              <td>Crystal Scarr</td>
-              <td>5/12</td>
-              <td>iClyde</td>
-            </tr>
-            <tr cG-room>
-              <td><i class="fa fa-unlock"></i></td>
-              <td>Super fajny i wgl room</td>
-              <td>Crystal Scarr</td>
-              <td>5/12</td>
-              <td>iClyde</td>
-            </tr>
-            <tr cG-room>
-              <td><i class="fa fa-unlock"></i></td>
-              <td>Super fajny i wgl room</td>
-              <td>Crystal Scarr</td>
-              <td>5/12</td>
-              <td>iClyde</td>
-            </tr>
-            <tr cG-room>
-              <td><i class="fa fa-unlock"></i></td>
-              <td>Super fajny i wgl room</td>
-              <td>Crystal Scarr</td>
-              <td>5/12</td>
-              <td>iClyde</td>
-            </tr>
-            <tr cG-room>
-              <td><i class="fa fa-unlock"></i></td>
-              <td>Super fajny i wgl room</td>
-              <td>Crystal Scarr</td>
-              <td>5/12</td>
-              <td>iClyde</td>
-            </tr>
-            <tr cG-room>
-              <td><i class="fa fa-unlock"></i></td>
-              <td>Super fajny i wgl room</td>
-              <td>Crystal Scarr</td>
-              <td>5/12</td>
-              <td>iClyde</td>
-            </tr>
-            <tr cG-room>
-              <td><i class="fa fa-unlock"></i></td>
-              <td>Super fajny i wgl room</td>
-              <td>Crystal Scarr</td>
-              <td>5/12</td>
-              <td>iClyde</td>
-            </tr>
-            <tr cG-room>
-              <td><i class="fa fa-unlock"></i></td>
-              <td>Super fajny i wgl room</td>
-              <td>Crystal Scarr</td>
-              <td>5/12</td>
-              <td>iClyde</td>
-            </tr>
-            <tr cG-room>
-              <td><i class="fa fa-unlock"></i></td>
-              <td>Super fajny i wgl room</td>
-              <td>Crystal Scarr</td>
-              <td>5/12</td>
-              <td>iClyde</td>
-            </tr>
-            <tr cG-room>
-              <td><i class="fa fa-unlock"></i></td>
-              <td>Super fajny i wgl room</td>
-              <td>Crystal Scarr</td>
-              <td>5/12</td>
-              <td>iClyde</td>
-            </tr>
-            <tr cG-room>
-              <td><i class="fa fa-unlock"></i></td>
-              <td>Super fajny i wgl room</td>
-              <td>Crystal Scarr</td>
-              <td>5/12</td>
-              <td>iClyde</td>
-            </tr>
-            <tr cG-room>
-              <td><i class="fa fa-unlock"></i></td>
-              <td>Super fajny i wgl room</td>
-              <td>Crystal Scarr</td>
-              <td>5/12</td>
-              <td>iClyde</td>
-            </tr>
-            <tr cG-room>
-              <td><i class="fa fa-unlock"></i></td>
-              <td>Super fajny i wgl room</td>
-              <td>Crystal Scarr</td>
-              <td>5/12</td>
-              <td>iClyde</td>
-            </tr>
-            <tr cG-room>
-              <td><i class="fa fa-unlock"></i></td>
-              <td>Super fajny i wgl room</td>
-              <td>Crystal Scarr</td>
-              <td>5/12</td>
-              <td>iClyde</td>
-            </tr>
-            <tr cG-room>
-              <td><i class="fa fa-unlock"></i></td>
-              <td>Super fajny i wgl room</td>
-              <td>Crystal Scarr</td>
-              <td>5/12</td>
-              <td>iClyde</td>
-            </tr>
-            <tr cG-room>
-              <td><i class="fa fa-unlock"></i></td>
-              <td>Super fajny i wgl room</td>
-              <td>Crystal Scarr</td>
-              <td>5/12</td>
-              <td>iClyde</td>
-            </tr>
-            <tr cG-room>
-              <td><i class="fa fa-unlock"></i></td>
-              <td>Super fajny i wgl room</td>
-              <td>Crystal Scarr</td>
-              <td>5/12</td>
-              <td>iClyde</td>
-            </tr>
-            <tr cG-room>
-              <td><i class="fa fa-unlock"></i></td>
-              <td>Super fajny i wgl room</td>
-              <td>Crystal Scarr</td>
-              <td>5/12</td>
-              <td>iClyde</td>
-            </tr>
-            <tr cG-room>
-              <td><i class="fa fa-unlock"></i></td>
-              <td>Super fajny i wgl room</td>
-              <td>Crystal Scarr</td>
-              <td>5/12</td>
-              <td>iClyde</td>
-            </tr>
-            <tr cG-room>
-              <td><i class="fa fa-unlock"></i></td>
-              <td>Super fajny i wgl room</td>
-              <td>Crystal Scarr</td>
-              <td>5/12</td>
-              <td>iClyde</td>
-            </tr>
-            <tr cG-room>
-              <td><i class="fa fa-unlock"></i></td>
-              <td>Super fajny i wgl room</td>
-              <td>Crystal Scarr</td>
-              <td>5/12</td>
-              <td>iClyde</td>
-            </tr>
-            <tr cG-room>
-              <td><i class="fa fa-unlock"></i></td>
-              <td>Super fajny i wgl room</td>
-              <td>Crystal Scarr</td>
-              <td>5/12</td>
-              <td>iClyde</td>
-            </tr>
-            <tr cG-room>
-              <td><i class="fa fa-unlock"></i></td>
-              <td>Super fajny i wgl room</td>
-              <td>Crystal Scarr</td>
-              <td>5/12</td>
-              <td>iClyde</td>
-            </tr>
-            <tr cG-room>
-              <td><i class="fa fa-unlock"></i></td>
-              <td>Super fajny i wgl room</td>
-              <td>Crystal Scarr</td>
-              <td>5/12</td>
-              <td>iClyde</td>
-            </tr>
-            <tr cG-room>
-              <td><i class="fa fa-unlock"></i></td>
-              <td>Super fajny i wgl room</td>
-              <td>Crystal Scarr</td>
-              <td>5/12</td>
-              <td>iClyde</td>
-            </tr>
-            <tr cG-room>
-              <td><i class="fa fa-unlock"></i></td>
-              <td>Super fajny i wgl room</td>
-              <td>Crystal Scarr</td>
-              <td>5/12</td>
-              <td>iClyde</td>
-            </tr>
-            <tr cG-room>
-              <td><i class="fa fa-unlock"></i></td>
-              <td>Super fajny i wgl room</td>
-              <td>Crystal Scarr</td>
-              <td>5/12</td>
-              <td>iClyde</td>
-            </tr>
-            <tr cg-room>
-              <td><i class="fa fa-unlock"></i></td>
-              <td>Super fajny i wgl room</td>
-              <td>Crystal Scarr</td>
-              <td>5/12</td>
-              <td>iClyde</td>
-            </tr>
-          </tbody>
+          <tbody class="cG-trs" style="overflow: auto"></tbody>
         </table>
 
       </div>
@@ -271,7 +77,6 @@
 
     <div class="cG-create-new-game" style="display: none;">
       <div class="cGC-choose-map">
-        <form>
 
           <label for="cGC-map-sr" class="cGC-map-label">
             <input type="radio" class="cGC-map-radio" name="cGC-map" id="cGC-map-sr" value="1" />
@@ -297,60 +102,61 @@
             <span class="cGC-map-span">Crystal scar</span>
           </label>
 
-        </form>
       </div>
       <div class="cGC-choose-options">
         <div class="row">
-          <label class="col">Name:<input class="darkput" type="text" placeholder="Room name" val="" /></label>
+          <label class="col">Name:<input class="darkput cGC-inputs-name" type="text" placeholder="Room name" val="" maxlength="32" /></label>
         </div>
 
         <div class="row">
-          <label class="col">
+          <label class="col" for="cGC-inputs-password">
             <span>Password: </span>
-            <label class="custom-darkbox"><input type="checkbox" class="darkbox" val="" /><span class="darkbox-image"></span><span class="darkbox-label">Show Password</span></label>
-            <input class="darkput" type="password" val="" />
+            <label class="custom-darkbox cGC-label-show-password" for="cGC-show-password"><input type="checkbox" class="darkbox cGC-show-password" id="cGC-show-password" /><span class="darkbox-image"></span><span class="darkbox-label">Show Password</span></label>
+            <input class="darkput cGC-inputs-password" id="cGC-inputs-password" type="password" maxlength="24" />
           </label>
-          <label class="col">
+          <label class="col" for="cGC-inputs-fastcode" rel="tooltip" data-html="true" title="You can create fast join code and share with friend remember your code got unique prefix! <br /><span class='text-danger'><b>Your friend do not need password!</b></span>">
             <span>Fastcode: </span>
-            <label class="custom-darkbox"><input type="checkbox" class="darkbox" val="" /><span class="darkbox-image"></span><span class="darkbox-label">Show Fastcode</span></label>
-            <input class="darkput" type="password" />
+            <label class="custom-darkbox cGC-label-show-fastcode" for="cGC-show-fastcode"><input type="checkbox" class="darkbox cGC-show-fastcode" id="cGC-show-fastcode" /><span class="darkbox-image"></span><span class="darkbox-label">Show Fastcode</span></label>
+            <span class="cGC-fast-code-prefix-span" style="position: absolute; left: 26px; top: 30px" rel="tooltip">p2-</span>
+            <input style="padding-left: 34px" class="darkput cGC-inputs-fastcode" id="cGC-inputs-fastcode" type="password" maxlength="12" />
           </label>
+          <button class="darkmit cGC-copy-fastcode mr-3" style="padding-left: 10px !important; padding-right: 10px !important; height: 36px; margin-top: 24px; width: auto; margin-left: -16px; border-radius: 0px;" disabled>Copy with prefix</button>
         </div>
 
         <div class="row">
-          <label class="ml-3"><span>Championselect mode</span>
-            <select class="darktor">
-              <option value="1">Blind</option>
-              <option value="2">Draft</option>
-              <option value="3">Random</option>
+          <label class="ml-3" rel="tooltip" title="Blind, draft with bans or random?"><span>Select Mode</span>
+            <select class="darktor cGC-inputs-mode">
+              <option value="0" selected>Blind</option>
+              <option value="1">Draft</option>
+              <option value="2">Random</option>
             </select>
           </label>
-          <label class="ml-3"><span>Cheats</span>
-            <select class="darktor">
-              <option value="1">Yes</option>
-              <option value="2">No</option>
+          <label class="ml-3" rel="tooltip" title="It allows you to use custom commands in game (type '%help' for help in game)"><span>Cheats</span>
+            <select class="darktor cGC-inputs-cheats">
+              <option value="0">Yes</option>
+              <option value="1" selected>No</option>
             </select>
           </label>
-          <label class="ml-3"><span>Minions</span>
-            <select class="darktor">
-              <option value="1">Yes</option>
-              <option value="2">No</option>
+          <label class="ml-3" rel="tooltip" title="Minions spawn?"><span>Minions</span>
+            <select class="darktor cGC-inputs-minions">
+              <option value="0" selected>Yes</option>
+              <option value="1">No</option>
             </select>
           </label>
-          <label class="ml-3"><span>Cooldowns</span>
-            <select class="darktor">
-              <option value="1">Yes</option>
-              <option value="2">No</option>
+          <label class="ml-3" rel="tooltip" title="Trun cooldowns on or off?"><span>Cooldowns</span>
+            <select class="darktor cGC-inputs-cooldowns">
+              <option value="0" selected>Yes</option>
+              <option value="1">No</option>
             </select>
           </label>
-          <label class="ml-3"><span>Teams size</span>
-            <select class="darktor">
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
+          <label class="ml-3" rel="tooltip" title="Teamsize for each team, hexakill on tt?"><span>Teams size</span>
+            <select class="darktor cGC-inputs-teamsize">
+              <option value="0">1</option>
+              <option value="1">2</option>
+              <option value="2">3</option>
+              <option value="3">4</option>
+              <option value="4" selected>5</option>
+              <option value="5">6</option>
             </select>
           </label>
         </div>

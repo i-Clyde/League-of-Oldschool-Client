@@ -1,0 +1,80 @@
+<section name="customGames-lobby">
+  <div class="kickedfromlobby modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content" style="border-radius: 5px">
+        <div class="modal-body" style="margin-bottom: 0px;padding: 15px;text-align: center;">
+
+          <div class="row">
+            <div class="col">
+              The king kicked you from the lobby!
+            </div>
+          </div>
+
+        </div>
+        <div class="modal-footer" style="padding: 15px;">
+          <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"><b>Awesome!</b></button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="cGL-invite-friends-modal modal fade" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Invite friends</h5>
+          <button type="button btn-sm" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal"><b>DONE</b></button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <main class="cGL-main container">
+    <div class="row">
+      <div class="col cGL-title"></div>
+    </div>
+    <div class="row">
+      <div class="col cGL-settings"></div>
+    </div>
+    <div class="row cGL-teams-list">
+      <div class="col cGL-team-list cGL-team-blue" teamcolor="blue">
+        <div class="cGL-player-in-team"></div>
+        <div class="cGL-player-in-team"></div>
+        <div class="cGL-player-in-team"></div>
+        <div class="cGL-player-in-team"></div>
+        <div class="cGL-player-in-team"></div>
+        <div class="cGL-player-in-team"></div>
+      </div>
+      <div class="col cGL-team-list cGL-team-red" teamcolor="red">
+        <div class="cGL-player-in-team"></div>
+        <div class="cGL-player-in-team"></div>
+        <div class="cGL-player-in-team"></div>
+        <div class="cGL-player-in-team"></div>
+        <div class="cGL-player-in-team"></div>
+        <div class="cGL-player-in-team"></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-6">
+        <div class="cGL-chat">
+          <div class="cGL-chat-messages" id="cGL-chat-messages"></div>
+          <div class="cGL-chat-input"><input class="darkput" id="cGL-chat-input"type="text" maxlength="128" placeholder="Type your message here!" /></div>
+        </div>
+      </div>
+      <div class="col-3">
+        <div class="cGL-invite-list">
+          <div class="cGL-invite-no-invites">There is no invites yet</div>
+        </div>
+      </div>
+      <div class="col-3">
+        <button class="darkmit exit-cGL">Exit custom game</button>
+        <button class="darkmit cGL-invite-friend-btn" disabled>Invite friend</button>
+        <button class="darkmit cGL-start-game-btn" disabled>Start Game</button>
+      </div>
+    </div>
+  </main>
+</section>

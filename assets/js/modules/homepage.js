@@ -22,18 +22,8 @@ function custom_alert(msg, type, time) {
 }
 
 function success_msg(msg) {custom_alert(msg, 'success', 7000)}
-function info_msg(msg) {
-  $('<div class="alerts info">' + msg + '</div>').appendTo('.client-alerts');
-  $('.alerts.info').animate({'opacity': '1'}, 'slow').delay(9000).fadeOut('slow', function(){
-    $(this).remove();
-  });
-}
-function error_msg(msg) {
-  $('<div class="alerts error">' + msg + '</div>').appendTo('.client-alerts');
-  $('.alerts.error').animate({'opacity': '1'}, 'slow').delay(10000).fadeOut('slow', function(){
-    $(this).remove();
-  });
-}
+function info_msg(msg) {custom_alert(msg, 'info', 9000)}
+function error_msg(msg) {custom_alert(msg, 'error', 10000)}
 
 // Alerts from server
 socket.on('error', msg => {
@@ -58,6 +48,16 @@ if ($('.social-content-friend-list .social-content-sub').length > 0) $('.social-
 $('body').tooltip({
     selector: '[rel=tooltip]'
 });
+
+// Copy to clipboard
+function copyToClipboard(text){
+  var placeholder = document.createElement("input");
+  document.body.appendChild(placeholder);
+  placeholder.setAttribute('value', text);
+  placeholder.select();
+  document.execCommand("copy");
+  document.body.removeChild(placeholder);
+}
 
 // If nickname is not set, force user to set it!
   localStorage.setItem('canplay', true);
@@ -84,7 +84,7 @@ $('body').tooltip({
         $('.social-zone .social-description').attr('value', desc);
         $('.social-zone .social-icon .social-icon-img').attr('src', '../assets/imgs/profileicon/'+data.icon+'.png')
 
-        $('.chat-box-chatter-lastmsg[cid=0]').html(((data.lastGMSG.pid == localStorage.getItem('playerid'))?'You: ':'')+data.lastGMSG.msg)
+        if (data.lastGMSG != null) $('.chat-box-chatter-lastmsg[cid=0]').html(((data.lastGMSG.pid == localStorage.getItem('playerid'))?'You: ':'')+data.lastGMSG.msg);
 
         $.each(data.messageHistory, function(index) {
           if (localStorage.getItem('friendsid').includes(index)) {
@@ -167,21 +167,59 @@ $('body').tooltip({
       });
 
       // Change status to away/online
-      $('.social-header-status-bar').on('click', () => {
+      function changeStatusToAwayBtn() {
+        $('.social-header-status-bar').on('click', () => {
+          let sp = $('.social-header-status-bar').parents('.social-header-sub');
+          let s = sp.attr('status'); if (s == 1) {
+            c = 2; $('.social-description').attr({'desc': $('.social-description').val(), 'disabled': 'disabled'}).val('I am Away!').css({'cursor': 'not-allowed'});
+          } else if (s == 2) {
+            c = 1; $('.social-description').val($('.social-description').attr('desc')).removeAttr('desc').removeAttr('disabled').css({'cursor': 'pointer'});
+          }
+
+          sp.attr('status', c);
+          $('.social-header-status-bar').removeClass().addClass('social-header-status-bar status-'+c+'bg');
+          $('.social-zone .social-icon img').removeClass().addClass('social-icon-img status-'+c);
+          $('.social-description').removeClass().addClass('social-description status-'+c)
+
+          socket.emit('update status req', {'status': c})
+        })
+      }; changeStatusToAwayBtn();
+
+      function changeEventStatus(eventname) {
         let sp = $('.social-header-status-bar').parents('.social-header-sub');
-        let s = sp.attr('status'); if (s == 1) {
-          c = 2; $('.social-description').attr({'desc': $('.social-description').val(), 'disabled': 'disabled'}).val('I am Away!').css({'cursor': 'not-allowed'});
-        } else if (s == 2) {
-          c = 1; $('.social-description').val($('.social-description').attr('desc')).removeAttr('desc').removeAttr('disabled').css({'cursor': 'pointer'});
+        let s = sp.attr('status');
+
+        if (s == 3) {$('.social-description').val(eventname).css({'cursor': 'not-allowed'})}
+        else if (s != 3) {$('.social-description').attr({'desc': $('.social-description').val(), 'disabled': 'disabled'}).val(eventname).css({'cursor': 'not-allowed'})}
+
+        $('.social-header-status-bar').removeClass().addClass('social-header-status-bar status-'+3+'bg');
+        $('.social-zone .social-icon img').removeClass().addClass('social-icon-img status-'+3);
+        $('.social-description').removeClass().addClass('social-description status-'+3);
+        $('.social-header-status-bar').off('click').css({'cursor': 'not-allowed'});
+        sp.attr('status', 3);
+
+        socket.emit('update status req', {'status': 3, 'desc': eventname})
+      }
+
+      function eventStatusDescEnd() {
+        let sp = $('.social-header-status-bar').parents('.social-header-sub');
+        let s = sp.attr('status');
+
+        if (s == 3) {
+          let desc = $('.social-description').attr('desc');
+
+          $('.social-description').removeAttr('desc').removeAttr('disabled').val(desc).css({'cursor': 'auto'})
+
+          $('.social-header-status-bar').removeClass().addClass('social-header-status-bar status-'+1+'bg');
+          $('.social-zone .social-icon img').removeClass().addClass('social-icon-img status-'+1);
+          $('.social-description').removeClass().addClass('social-description status-'+1);
+          $('.social-header-status-bar').off('click').css({'cursor': 'pointer'});
+          sp.attr('status', 1);
+
+          socket.emit('update status req', {'status': 1, 'desc': desc})
+          changeStatusToAwayBtn();
         }
-
-        sp.attr('status', c);
-        $('.social-header-status-bar').removeClass().addClass('social-header-status-bar status-'+c+'bg');
-        $('.social-zone .social-icon img').removeClass().addClass('social-icon-img status-'+c);
-        $('.social-description').removeClass().addClass('social-description status-'+c)
-
-        socket.emit('update status req', {'status': c})
-      })
+      }
 
       // Show panels
       function startHomepage() {
@@ -445,6 +483,8 @@ $('body').tooltip({
             $('.chat-box-title i').text(newmsgs+' new message'+((newmsgs > 1)?'s':''))
             $('.chat-box-title i').animate({'opacity': 1}, 'slow')
           }
+
+          sound_newmsg_play();
         }
       }
 
@@ -509,7 +549,7 @@ $('body').tooltip({
         let h = (date.getHours() <= 9)?'0'+date.getHours():date.getHours();
         let i = (date.getMinutes() <= 9)?'0'+date.getMinutes():date.getMinutes();
 
-        $('.chat-box-conversation-content[cid='+data.cid+']').append('<div class="chat-msg-content" pid="'+data.from+'" date="'+data.date+'">'+whenMsgWasSent()+from+'<div class="chat-msg'+isyou+'" rel="tooltip" title="'+h+':'+i+'" rel="tooltip"><span>'+data.msg+'</span></div><div style="clear: both"></div></div>');
+        $('.chat-box-conversation-content[cid='+data.cid+']').append('<div class="chat-msg-content" pid="'+data.from+'" date="'+data.date+'">'+whenMsgWasSent()+from+'<div class="chat-msg'+isyou+'" rel="tooltip" title="'+h+':'+i+'"><span>'+data.msg+'</span></div><div style="clear: both"></div></div>');
 
         $('.chat-box-conversation').animate({ scrollTop: $('.chat-box-conversation-content[cid='+data.cid+']').height() }, "fast");
 
@@ -522,7 +562,7 @@ $('body').tooltip({
         }
 
         if (read && (data.from == data.cid)) msgHasBeenRead(data.from, true);
-
+        scrollBottomSChat();
       });
 
       // Scroll chat to the bottom
@@ -658,6 +698,7 @@ $('body').tooltip({
       }
 
       // Add friend input
+      $('.add-friends-input').off('keyup');
       $('.add-friends-input').on('keyup', function(e) {
         if (e.which == 13) {
           let nick = $('.add-friends-input').val().trim();
@@ -681,7 +722,8 @@ $('body').tooltip({
         } else {
           if (status == 0) update('Offline')
           else if (status == 2) update('I am Away!')
-          else if (status == 1) update(desc);
+          else if (status == 1) update(desc)
+          else if (status == 3) update(desc)
         }
 
       }
@@ -859,6 +901,7 @@ $('body').tooltip({
 
     // Homepage menu
         $('button.client-menu-playbtn').on('click', function(x) {
+          if ($('button.client-menu-playbtn').attr('data-lobby') == 'true') return false;
           if (($('.client-menu-playbtn').attr('data-selected') == 'false') && (($('.client-menu-play-modes').height() == 0) || ($('.client-menu-play-sub').css('display') == 'none') )) {
             $('.client-menu-playbtn').attr({'data-selected': 'true'});
             $('.client-menu-play-sub').toggle(1, function() {
@@ -898,31 +941,811 @@ $('body').tooltip({
             $('.client-menu-playbtn').attr({'data-selected': 'false'});
 
             $('.client-menu-play-custom').css({'background-color': 'rgba(255, 255, 255, 0.1)', 'cursor': 'not-allowed', 'color': 'rgba(255, 255, 255, 0.8)'});
+            $('.client-menu-play-custom').attr({'custom-list': true});
             $('.client-menu-play-custom').off('click');
 
             $( ".homepage" ).load( "models/customs.html", function() {
+              socket.emit('custom game list load');
+
+              $('.cG-enter-fastcode').off('click');
+              $('.cG-enter-fastcode').on('click', function() {$('.joinviafastcodemodal').appendTo("body").modal()});
+
+              $('.cG-trs').on('click', 'tr[cG-room]', function() {
+                let token = $(this).attr('cG-room-token')
+                let password = $(this).attr('cG-room-password')
+
+                if (password == 'true') {
+                  $('.enter-cg-password').appendTo('body').modal();
+                  $('#cG_join_with_password_btn').off('click');
+                  $('#cG_join_with_password_btn').on('click', function() {
+                    socket.emit('custom game join', {'password': $('#cG_join_need_password_input').val(), 'token': token})
+                  })
+
+                  $('.enter-cg-password').on('hidden.bs.modal', function () {
+                    $('.cG_join_with_password_btn').off('click');
+                  })
+                } else socket.emit('custom game join', {'token': token})
+              })
 
               $('button.close-customs-btn').on('click', () => {
                 $('.client-menu-play-custom').css({'background-color': '', 'cursor': 'pointer', 'color': 'white'});
                 $('section[name=customGames]').animate({'opacity': 0}, () => {
                   $('section[name=customGames]').remove();
                 })
+                $('.cGC-create-room-btn').off('click');
+                $('button.close-customs-btn').off('click');
+                $('.joinviafastcodemodal').remove();
                 customGamesList();
+                eventStatusDescEnd();
               })
 
-              $('.cG-enter-fastcode').on('click', function() {$('.joinviafastcodemodal').appendTo("body").modal()});
-              $('.joinviafastcodemodal').on('shown.bs.modal', function() {$(this).find('#cG_join_via_fastcode_input').focus()});
+              $('.joinviafastcodemodal').on('shown.bs.modal', function() {
+                $(this).find('#cG_join_via_fastcode_input').focus()
+              });
 
               $('.cG-create-new-room').on('click', function() {
                 $('.cG-customs').fadeOut(500, () => {$('.cG-customs').hide();$('.cG-create-new-game').fadeIn(800)});
                 $('.back-to-customs-btn').on('click', () => {
-                  $('.cG-create-new-game').fadeOut(500, () => {$('.cG-create-new-game').hide();$('.cG-customs').fadeIn(800)});
+                  $('.cG-create-new-game').fadeOut(500, () => {$('.cG-create-new-game').hide();$('.cG-customs').fadeIn(800);eventStatusDescEnd()});
                 })
+                $('.cGC-inputs-name').val("Player's game: "+localStorage.getItem('nickname'))
+                $('.cGC-fast-code-prefix-span').val('p'+localStorage.getItem('playerid'))
+                $('.cGC-fast-code-prefix-span').text('p'+localStorage.getItem('playerid')+'-')
+                $('.cGC-fast-code-prefix-span').attr({'cGC-fastcode-prefix': 'p'+localStorage.getItem('playerid'), 'title': 'This is your fastcode prefix (p'+localStorage.getItem('playerid')+'-xxxxxx)'})
+                changeEventStatus('Creating lobby');
               })
+
+              $('.cGC-label-show-password').on('click', function() {($('.cGC-show-password').is(':checked')) ? $('.cGC-inputs-password').attr('type', 'text') : $('.cGC-inputs-password').attr('type', 'password')})
+              $('.cGC-label-show-fastcode').on('click', function() {($('.cGC-show-fastcode').is(':checked')) ? $('.cGC-inputs-fastcode').attr('type', 'text') : $('.cGC-inputs-fastcode').attr('type', 'password')})
+              $('.cGC-copy-fastcode').on('click', function() {
+                let fastCode = $('.cGC-inputs-fastcode').val();
+                let fastCodePrefix = $('.cGC-fast-code-prefix-span').attr('cgc-fastcode-prefix');
+
+                if ((fastCode.length >= 1) && (fastCode.length <= 12)) {
+                  copyToClipboard(fastCodePrefix + '-' + fastCode);
+                  success_msg('Fastcode with prefix has been copied!')
+                } else {
+                  if (fastCode.length > 12) error_msg('Your Fastcode is too long! (Max 12 chars)')
+                  else if (fastCode.length == 0) error_msg('You need to enter Fastcode first')
+                }
+              });
+
+              $('#cGC-inputs-fastcode').on('keyup', function() {
+                if ($('.cGC-inputs-fastcode').val().length > 0) $('.cGC-copy-fastcode').removeAttr('disabled'); else $('.cGC-copy-fastcode').attr({'disabled': 'disabled'})});
+
+              $('.cGC-inputs-name').on('keyup', function() {
+                if (($('.cGC-inputs-name').val().length >= 3) && ($('.cGC-map-radio[name=cGC-map]:checked').length > 0)) $('.cGC-create-room-btn').removeAttr('disabled'); else $('.cGC-create-room-btn').attr({'disabled': 'disabled'})
+              });
+
+              $('.cGC-map-radio[name=cGC-map]').on('change', function() {
+                if (($('.cGC-inputs-name').val().length >= 3) && ($('.cGC-map-radio[name=cGC-map]:checked').length > 0)) $('.cGC-create-room-btn').removeAttr('disabled');
+                else $('.cGC-create-room-btn').attr({'disabled': 'disabled'})
+              });
+
+              var newgamee = $('.cGC-create-room-btn').one('click', function() {
+                $('.loader').show().animate({'opacity': 1}, 300);
+                $('.cGC-create-room-btn').attr({'disabled': 'disabled'})
+                $('.back-to-customs-btn').attr({'disabled': 'disabled'})
+                $('.close-customs-btn').attr({'disabled': 'disabled'})
+
+                let map = $('.cGC-map-radio[name=cGC-map]:checked').val(),
+                name = $('.cGC-inputs-name').val().trim(),
+                password = $('.cGC-inputs-password').val(),
+                fastcode = $('.cGC-inputs-fastcode').val(),
+                mode = $('.cGC-inputs-mode').val(),
+                cheats = $('.cGC-inputs-cheats').val(),
+                minions = $('.cGC-inputs-minions').val(),
+                cooldowns = $('.cGC-inputs-cooldowns').val(),
+                teamsize = $('.cGC-inputs-teamsize').val()
+
+                socket.emit('custom game create', {'map': map, 'name': name, 'password': password, 'fastcode': fastcode, 'settings': {
+                  'mode': mode, 'cheats': cheats, 'minions': minions, 'cooldowns': cooldowns, 'teamsize': teamsize}
+                })
+
+                changeEventStatus('In lobby');
+
+              })
+
             });
           }
         })
       } customGamesList();
+
+      $('body').on('keyup', 'input#cG_join_via_fastcode_input', function(e) {
+        if (e.which === 13) {$('#cG_join_via_fastcode_btn').trigger('click')}
+        if ($('input#cG_join_via_fastcode_input').val().length > 3) $('button#cG_join_via_fastcode_btn').removeAttr('disabled');
+        else $('button#cG_join_via_fastcode_btn').attr({'disabled': 'disabled'});
+      })
+
+      $('body').on('click', 'button#cG_join_via_fastcode_btn', function() {
+        socket.emit('custom game join via fastcode', $('input#cG_join_via_fastcode_input').val());$('input#cG_join_via_fastcode_input').val('')
+      })
+
+      socket.on('fastcode secret response', (res) => {if (res == 'success') {$('.joinviafastcodemodal').modal('hide'); setTimeout(() => {$('.joinviafastcodemodal').remove()},1000)}});
+
+      // Scroll lobby chat to the bottom
+      function scrollLobbyBottomSChat() {
+        var chatbox_sc = document.getElementById("cGL-chat-messages");
+        chatbox_sc.scrollTop = chatbox_sc.scrollHeight;
+      }
+
+      function isAnyCustomThere() {if ($('[cG-room]').length == 0) $('[cG-no-rooms]').show('fade', {}, 'slow'); else $('[cG-no-rooms]').hide('fade', {}, 'slow')}
+      socket.on('custom game create res', (data) => {
+        $('.loader').animate({'opacity': 0}, 300, () => {$('.loader').hide()});
+        $('.back-to-customs-btn').removeAttr('disabled')
+        $('.close-customs-btn').removeAttr('disabled')
+        if (data.type == 'success') {
+
+          let mapval = $('.cGC-map-radio[name=cGC-map]:checked').val(),
+          name = $('.cGC-inputs-name').val().trim(),
+          password = $('.cGC-inputs-password').val(),
+          modeval = $('.cGC-inputs-mode').val(),
+          cheats = $('.cGC-inputs-cheats').val(),
+          minions = $('.cGC-inputs-minions').val(),
+          cooldowns = $('.cGC-inputs-cooldowns').val(),
+          teamsize = $('.cGC-inputs-teamsize').val(),
+          ispsswd = false;
+
+          $('.cGC-create-room-btn').removeAttr('disabled')
+          success_msg(data.msg);
+
+          $('button.client-menu-playbtn').attr({'data-lobby': true}).text('IN LOBBY');
+          $('.client-menu-play-custom').css({'background-color': '', 'cursor': 'pointer', 'color': 'white'});
+          $('section[name=customGames]').animate({'opacity': 0}, () => {
+            $('section[name=customGames]').remove();
+          })
+          customGamesList();
+
+          $('.homepage').css({'opacity': 0}).hide();
+          $('.homepage').load('./models/customs_lobby.html', function() { ///////////// LOAD
+
+            $(document).ready(() => {
+              $('.homepage').on('keyup', 'input#cGL-chat-input', function(e) {
+                if ((e.which === 13) && ($('input#cGL-chat-input').val().length > 0) && ($('input#cGL-chat-input').val().length <= 128)) {
+                  socket.emit('custom game send message', $('input#cGL-chat-input').val()); $('input#cGL-chat-input').val('');
+                }
+              });
+              $('body > .cGL-invite-friends-modal').remove();
+              $('.homepage .cGL-invite-friends-modal').appendTo('body');
+            })
+
+            $('section[name=customGames-lobby]').attr({'token': data.info.cGID})
+
+            $('.exit-cGL').on('click', function() {
+              socket.emit('custom game leave', {'cGID': $('section[name=customGames-lobby]').attr('token')})
+              $('section[name=customGames-lobby]').fadeOut(600, function() {
+                $('.client-menu-playbtn').attr({'data-lobby': 'false'}).text('PLAY');
+                $('section[name=customGames-lobby]').remove();
+                $('.cGC-create-room-btn').off('click');
+                $('.cG-enter-fastcode').off('click');
+                $('button.close-customs-btn').off('click');
+                eventStatusDescEnd();
+              })
+              $('#login-page').css({'background-image': 'url("../assets/imgs/loginBG.jpg")'})
+            });
+
+            if (password.length > 0) ispsswd = true;
+            let padlock = (ispsswd)?'<i class="fa fa-lock"></i>':'<i class="fa fa-unlock"></i>', map, picktype;
+            switch(mapval) {
+              case '1': map = 'Summoner\'s rift'; $('#login-page').css({'background-image': 'url("../assets/imgs/mapsimgs/sr.jpg")'});break;
+              case '2': map = 'Howling abyss';$('#login-page').css({'background-image': 'url("../assets/imgs/mapsimgs/ha.jpg")'});break;
+              case '3': map = 'Twisted threeline';$('#login-page').css({'background-image': 'url("../assets/imgs/mapsimgs/tt.jpg")'});break;
+              case '4': map = 'Crystal scar';$('#login-page').css({'background-image': 'url("../assets/imgs/mapsimgs/cs.jpg")'});break;
+            }
+            $('#login-page').css({'filter': 'blur(8px)'});
+            switch(modeval) {
+              case '0': picktype = 'Blind pick';break;
+              case '1': picktype = 'Draft pick';break;
+              case '2': picktype = 'Random pick';break;
+            }
+
+            function yesOrNotSetting(s) {
+              switch(s) {
+                case '0': return('Yes'); break;
+                case '1': return('No'); break;
+              }
+            }
+
+            teamsize = parseInt(teamsize)+1;
+
+            $('.cGL-title').html('<h3>'+padlock+' '+name+'</h3>')
+            $('.cGL-settings').html('Map: '+map+' - '+picktype+': '+teamsize+'x'+teamsize+' - Minions: '+yesOrNotSetting(minions)+' - Cooldowns: '+yesOrNotSetting(cooldowns)+' - Cheats: '+yesOrNotSetting(cheats)+'')
+
+            for (i=1; i <= teamsize; i++) {
+              $('.cGL-team-blue > .cGL-player-in-team:nth-child('+i+')').addClass('empty').text('Empty');
+              $('.cGL-team-red > .cGL-player-in-team:nth-child('+i+')').addClass('empty').text('Empty');
+            }
+            $('.cGL-team-red > .cGL-player-in-team.empty').first().html('<button class="darkmit cGL-join-btn">Join</button>Empty');
+
+            $(function () {
+              $('[data-toggle="tooltip"]').tooltip()
+            })
+
+            $('.cGL-team-blue > .cGL-player-in-team.empty').first().before('\
+            <div class="cGL-player-in-team full" pid="'+localStorage.getItem('playerid')+'">\
+              <div class="cGL-player-img"><img src="'+$('.social-header-sub .social-icon img').attr('src')+'" /></div>\
+              <div class="cGL-player-nick-options">\
+                <div class="cGL-player-nick"><i class="fas fa-crown"></i> <span>'+ $('.social-header-pinfo .social-nick b').text() +'</span></div>\
+                <div class="cGL-player-option">\
+                  <button class="cGL-player-option-btn btn btn-primary" setting="4" data-toggle="tooltip" data-placement="bottom" title="Show player\'s profile"><i class="fas fa-address-card"></i></button>\
+                </div>\
+              </div>\
+            </div>')
+            $('.cGL-team-blue > .cGL-player-in-team.empty').last().remove();
+
+            $('.cGL-chat-messages').append('<div class="cGL-chat-message"><i>'+$('.social-header-pinfo .social-nick b').text()+' joined the lobby!</i></div>');
+
+            $('.cGL-invite-friend-btn').removeAttr('disabled');
+            $('.cGL-start-game-btn').removeAttr('disabled');
+
+          }).show().animate({'opacity': 1}, 600)
+
+
+        } else if (data.type == 'error') {
+
+          if (data.msg != null) {
+            error_msg(data.msg)
+
+            switch(data.eID) {
+              case 1: console.log('error1'); break;
+            }
+          }
+
+        }
+      })
+
+      socket.on('custom game player joined', function(data) {
+        if (data.pid != localStorage.getItem('playerid')) {
+          let team = (data.team)?'blue':'red'
+          $('section[name=customGames-lobby] .cGL-chat-messages').append('<div class="cGL-chat-message"><i>'+data.nick+' joined to the lobby!</i></div>');
+          scrollLobbyBottomSChat();
+
+          let kingid = $('.cGL-player-nick .fa-crown').parents('.cGL-player-in-team').attr('pid');
+
+          $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+          })
+
+          $('.cGL-team-'+team+' > .cGL-player-in-team.empty').first().before('\
+          <div class="cGL-player-in-team full" pid="'+data.pid+'">\
+            <div class="cGL-player-img"><img src="../assets/imgs/profileicon/'+data.iconid+'.png" /></div>\
+            <div class="cGL-player-nick-options">\
+              <div class="cGL-player-nick"><span>'+ data.nick +'</span></div>\
+              <div class="cGL-player-option">\
+                '+((kingid == localStorage.getItem('playerid'))?'\
+                <button class="cGL-player-option-btn btn btn-danger" setting="0" data-toggle="tooltip" data-placement="bottom" title="Kick this player from lobby"><i class="fas fa-user-times"></i></button>\
+                <button class="cGL-player-option-btn btn btn-primary" setting="1" data-toggle="tooltip" data-placement="bottom" title="Allow/disallow this player to send invites"><i class="fas fa-user-plus"></i></button>\
+                <button class="cGL-player-option-btn btn btn-primary" setting="2" data-toggle="tooltip" data-placement="bottom" title="Give him your crown"><i class="fas fa-crown"></i></button>':'\
+                <button class="cGL-player-option-btn btn btn-danger no-king" setting="0" data-toggle="tooltip" data-placement="bottom" title="Kick this player from lobby"><i class="fas fa-user-times"></i></button>\
+                <button class="cGL-player-option-btn btn btn-primary no-king" setting="1" data-toggle="tooltip" data-placement="bottom" title="Allow/disallow this player to send invites"><i class="fas fa-user-plus"></i></button>\
+                <button class="cGL-player-option-btn btn btn-primary no-king" setting="2" data-toggle="tooltip" data-placement="bottom" title="Give him your crown"><i class="fas fa-crown"></i></button>')+'\
+                '+((($('.social-content-sub[pid='+data.pid+']').length == 0) && (data.pid != parseInt(localStorage.getItem('playerid'))))?'<button class="cGL-player-option-btn btn btn-success" setting="3" data-toggle="tooltip" data-placement="bottom" title="Ask this player for friendship"><i class="fas fa-plus"></i></button>':'')+'\
+                <button class="cGL-player-option-btn btn btn-primary" setting="4" data-toggle="tooltip" data-placement="bottom" title="Show player\'s profile"><i class="fas fa-address-card"></i></button>\
+              </div>\
+            </div>\
+          </div>')
+          $('.cGL-team-'+team+' > .cGL-player-in-team.empty').last().remove();
+        }
+      })
+
+      socket.on('custom game player left', function(data) {
+        $('section[name=customGames-lobby] .cGL-player-in-team[pid='+data.pid+']').remove();
+        if ($('section[name=customGames-lobby] .cGL-team-'+data.teamcolor+' .cGL-player-in-team.full').length > 0) {
+          $('section[name=customGames-lobby] .cGL-team-'+data.teamcolor+' .cGL-player-in-team.full').last().after('<div class="cGL-player-in-team empty">Empty</div>');
+        } else {
+          $('section[name=customGames-lobby] .cGL-team-'+data.teamcolor+' .cGL-player-in-team').first().before('<div class="cGL-player-in-team empty">Empty</div>');
+        }
+
+
+        let teamcolor = $('.cGL-player-in-team.full[pid='+localStorage.getItem('playerid')+']').parents('.cGL-team-list').attr('teamcolor');
+        $('.cGL-player-in-team.empty button').remove();
+        $('.cGL-team-'+((teamcolor == 'red')?'blue':'red')+' .cGL-player-in-team.empty').first().prepend('<button class="darkmit cGL-join-btn">Join</button>');
+
+        if (!data.started) {$('section[name=customGames-lobby] .cGL-chat-messages').append('<div class="cGL-chat-message"><i>'+data.nick+' left the lobby.</i></div>')}
+        scrollLobbyBottomSChat();
+      })
+
+      socket.on('custom game icon changed', function(data) {$('section[name=customGames-lobby] .cGL-player-in-team[pid='+data.pid+'] .cGL-player-img img').attr({'src': '../assets/imgs/profileicon/'+data.iconid+'.png'})})
+
+      function addNewLobbyRoomToList(value) {
+        let padlock = (value.password)?'<i class="fa fa-lock">':'<i class="fa fa-unlock">', map;
+        switch(value.map) {
+          case 1: map = 'Summoner\'s rift';break;
+          case 2: map = 'Howling abyss';break;
+          case 3: map = 'Twisted threeline';break;
+          case 4: map = 'Crystal scar';break;
+        }
+
+        let teamsize = value.online+'/'+(parseInt(value.teamsize)+1)*2;
+        $('.cG-trs').prepend('<tr cG-room style="opacity: 0; height: 0" cG-room-token="'+value.token+'" cG-room-password="'+value.password+'"><td>'+padlock+'</td><td>'+value.name+'</td><td>'+map+'</td><td cGL-td-teamsize="'+(parseInt(value.teamsize)+1)*2+'" cGL-td-online="'+value.online+'">'+teamsize+'</td><td>'+value.createdby+'</td></tr>');
+        $('tr[cG-room-token="'+value.token+'"]').animate({'height': '34px', 'opacity': 1}, 600)
+      }
+
+      socket.on('custom game list load res', function(cGLR) {
+        $('.cG-trs').html('<tr cG-no-rooms><td></td><td colspan="4">There is no rooms yet! (You can create one)</td></tr>');
+
+        $.each(cGLR, function (index, value) {
+          addNewLobbyRoomToList(value)
+        }); isAnyCustomThere();
+      });
+
+      socket.on('custom game info update', function(data) {
+        if ($('.client-menu-play-custom').attr('custom-list')) {
+          let listedGame = $('tr[cG-room-token="'+data.token+'"]'), online, max;
+
+          switch(data.type) {
+            case 1: // New player joined online++
+              online = listedGame.find('td[cGL-td-online]').attr('cGL-td-online');
+              max = listedGame.find('td[cGL-td-teamsize]').attr('cGL-td-teamsize');
+              listedGame.find('td[cGL-td-online]').attr({'cGL-td-online': parseInt(online)+1});
+              listedGame.find('td[cGL-td-online]').html((parseInt(online)+1)+'/'+max)
+              break;
+            case 2: // Player left lobby--
+              online = listedGame.find('td[cGL-td-online]').attr('cGL-td-online');
+              max = listedGame.find('td[cGL-td-teamsize]').attr('cGL-td-teamsize');
+              listedGame.find('td[cGL-td-online]').attr({'cGL-td-online': parseInt(online)-1});
+              listedGame.find('td[cGL-td-online]').html((parseInt(online)-1)+'/'+max);
+              break;
+            case 6: // Show room after force champion select stop
+              listedGame.show('fade', {}, 'slow', () => {listedGame.attr('cG-room');isAnyCustomThere()});
+              break;
+            case 7: // Hide room after start
+              listedGame.hide('fade', {}, 'slow', () => {listedGame.removeAttr('cG-room');isAnyCustomThere()});
+              break;
+            case 8: // Room created (show new room)
+              addNewLobbyRoomToList(data.newroom);isAnyCustomThere();
+              break;
+            case 9: // Room removed
+              listedGame.animate({'opacity': 0, 'height': 0}, 600, () => {listedGame.remove(); isAnyCustomThere()});
+              break;
+          }
+        }
+
+        if ((data.type == 9) && ($('.social-game-invitation[token="'+data.token+'"]').length == 1)) {
+          $('.social-game-invitation[token="'+data.token+'"]').css({'background-color': 'rgba(169, 13, 13, 0.41)'}).hide('drop', { direction: 'left'}, 'slow', function() {
+            $('.social-game-invitation[token="'+data.token+'"]').remove()})
+        }
+      })
+
+      socket.on('custom game moved', function(data) {
+        if (data.ispsswd) $('.enter-cg-password').modal('toggle');
+        $('.client-menu-play-custom').css({'background-color': 'rgba(255, 255, 255, 0.1)', 'cursor': 'not-allowed', 'color': 'rgba(255, 255, 255, 0.8)'});
+        $('.client-menu-play-custom').attr({'custom-list': true});
+        $('.client-menu-playbtn').attr({'data-lobby': 'true'}).text('IN LOBBY');
+
+        $('.homepage').fadeOut(500, () => {$('.homepage').load('./models/customs_lobby.html', function() { ///////////// LOAD
+
+          $('section[name=customGames-lobby]').attr({'token': data.gametoken})
+
+          $('.exit-cGL').on('click', function() {
+            socket.emit('custom game leave', {'cGID': $('section[name=customGames-lobby]').attr('token')})
+            $('section[name=customGames-lobby]').fadeOut(600, function() {
+              $('.client-menu-playbtn').attr({'data-lobby': 'false'}).text('PLAY');
+              $('.client-menu-play-custom').css({'background-color': '', 'cursor': 'pointer', 'color': 'white'});
+              $('.client-menu-play-custom').attr({'custom-list': false});
+              $('section[name=customGames-lobby]').fadeOut(700, () => {$('section[name=customGames-lobby]').remove()});
+              $('.cGC-create-room-btn').off('click');
+              $('.cG-enter-fastcode').off('click');
+              $('button.close-customs-btn').off('click');
+              customGamesList();
+              eventStatusDescEnd()
+            })
+            $('#login-page').css({'background-image': 'url("../assets/imgs/loginBG.jpg")'})
+          });
+
+          $(document).ready(() => {
+            $('.homepage').on('keyup', 'input#cGL-chat-input', function(e) {
+              if ((e.which === 13) && ($('input#cGL-chat-input').val().length > 0) && ($('input#cGL-chat-input').val().length <= 128)) {
+                socket.emit('custom game send message', $('input#cGL-chat-input').val()); $('input#cGL-chat-input').val('');
+              }
+            });
+            $('body > .cGL-invite-friends-modal').remove();
+            $('.cGL-invite-friends-modal').appendTo('body');
+            changeEventStatus('In lobby');
+          })
+
+          let padlock = (data.ispsswd)?'<i class="fa fa-lock"></i>':'<i class="fa fa-unlock"></i>', map, picktype;
+          switch(data.map) {
+            case 1: map = 'Summoner\'s rift'; $('#login-page').css({'background-image': 'url("../assets/imgs/mapsimgs/sr.jpg")'});break;
+            case 2: map = 'Howling abyss';$('#login-page').css({'background-image': 'url("../assets/imgs/mapsimgs/ha.jpg")'});break;
+            case 3: map = 'Twisted threeline';$('#login-page').css({'background-image': 'url("../assets/imgs/mapsimgs/tt.jpg")'});break;
+            case 4: map = 'Crystal scar';$('#login-page').css({'background-image': 'url("../assets/imgs/mapsimgs/cs.jpg")'});break;
+          }
+          $('#login-page').css({'filter': 'blur(8px)'});
+          switch(data.type) {
+            case 0: picktype = 'Blind pick';break;
+            case 1: picktype = 'Draft pick';break;
+            case 2: picktype = 'Random pick';break;
+          }
+
+          function yesOrNotSetting(s) {
+            switch(s) {
+              case 0: return('Yes'); break;
+              case 1: return('No'); break;
+            }
+          }
+
+          teamsize = data.teamsize+1;
+
+          $('.cGL-title').html('<h3>'+padlock+' '+data.name+'</h3>')
+          $('.cGL-settings').html('Map: '+map+' - '+picktype+': '+teamsize+'x'+teamsize+' - Minions: '+yesOrNotSetting(data.minions)+' - Cooldowns: '+yesOrNotSetting(data.cooldowns)+' - Cheats: '+yesOrNotSetting(data.cheats)+'')
+
+          for (i=1; i <= teamsize; i++) {
+            $('.cGL-team-blue > .cGL-player-in-team:nth-child('+i+')').addClass('empty').text('Empty');
+            $('.cGL-team-red > .cGL-player-in-team:nth-child('+i+')').addClass('empty').text('Empty');
+          }
+
+          $.each(data.blue, function(i, value) {
+            addPlayerToTeamCGL('blue', value, data.nicksets[value]['nick'], '../assets/imgs/profileicon/'+data.nicksets[value]['icon']+'.png')
+          })
+
+          $.each(data.purple, function(i, value) {
+            addPlayerToTeamCGL('red', value, data.nicksets[value]['nick'], '../assets/imgs/profileicon/'+data.nicksets[value]['icon']+'.png')
+          })
+
+          addPlayerToTeamCGL((data.myteam)?'blue':'red', localStorage.getItem('playerid'), $('.social-header-pinfo .social-nick b').text(), $('.social-header-sub .social-icon img').attr('src'), true)
+
+          $('.cGL-team-'+((data.myteam)?'red':'blue')+' > .cGL-player-in-team.empty').first().html('<button class="darkmit cGL-join-btn">Join</button>Empty');
+
+          $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+          })
+
+          function addPlayerToTeamCGL(team, pid, nick, icon, isme=false) {
+            $('.cGL-team-'+team+' > .cGL-player-in-team.empty').first().before('\
+            <div '+((isme)?'style="border-left: 5px solid gold;" ':'')+'class="cGL-player-in-team full" pid="'+pid+'">\
+              <div class="cGL-player-img"><img src="'+icon+'" /></div>\
+              <div class="cGL-player-nick-options">\
+                <div class="cGL-player-nick"><span>'+ nick +'</span></div>\
+                <div class="cGL-player-option">\
+                '+((!isme)?'<button class="cGL-player-option-btn btn btn-danger no-king" setting="0" data-toggle="tooltip" data-placement="bottom" title="Kick this player from lobby"><i class="fas fa-user-times"></i></button>\
+                <button class="cGL-player-option-btn btn btn-primary no-king" setting="1" data-toggle="tooltip" data-placement="bottom" title="Allow/disallow this player to send invites"><i class="fas fa-user-plus"></i></button>\
+                <button class="cGL-player-option-btn btn btn-primary no-king" setting="2" data-toggle="tooltip" data-placement="bottom" title="Give him your crown"><i class="fas fa-crown"></i></button>':'')+'\
+                '+((($('.social-content-sub[pid='+pid+']').length == 0) && (parseInt(pid) != parseInt(localStorage.getItem('playerid'))))?'<button class="cGL-player-option-btn btn btn-success" setting="3" data-toggle="tooltip" data-placement="bottom" title="Ask this player for friendship"><i class="fas fa-plus"></i></button>':'')+'\
+                <button class="cGL-player-option-btn btn btn-primary" setting="4" data-toggle="tooltip" data-placement="bottom" title="Show player\'s profile"><i class="fas fa-address-card"></i></button>\
+                </div>\
+              </div>\
+            </div>')
+            $('.cGL-team-'+team+' > .cGL-player-in-team.empty').last().remove();
+          }
+
+          $('.cGL-player-in-team.full[pid='+data.king+'] .cGL-player-nick').prepend('<i class="fas fa-crown"></i> ');
+          $('.cGL-chat-messages').append('<div class="cGL-chat-message"><i>'+$('.social-header-pinfo .social-nick b').text()+' joined the lobby!</i></div>');
+
+          if ($('.social-game-invitation').length > 0) $('.social-game-invitation').fadeOut(400, function() {$('.social-game-invitation').remove()})
+
+          if (data.invites.all.length > 0) {
+            $('.cGL-invite-no-invites').hide();
+
+            data.invites.all.forEach(function(index) {
+              $('.cGL-invite-list').append ('<div class="cGL-invite" pid="'+index+'" status="pending"><div class="cGL-invite-nick">'+((index != localStorage.getItem('playerid'))?data.players[index]:localStorage.getItem('nickname'))+'</div><i class="fas fa-circle-notch fa-spin"></i></div>');
+
+              if (data.invites.accepted.includes(index) || (index == localStorage.getItem('playerid'))) customGameMakeHimAccepted(index)
+              if (data.invites.declined.includes(index) && (index != localStorage.getItem('playerid'))) customGameMakeHimDeclined(index)
+            })
+
+          }
+
+        }).animate({'opacity': 1}, 600, () => {$('.homepage').fadeIn(600)})
+      });
+      });
+
+      socket.on('custom game new message', function(data) {
+        let crown = ''; if( $('.cGL-player-nick i').parents('.cGL-player-in-team.full').attr('pid') == data.pid) {crown = '<i class="fas fa-crown"></i> '};
+        $('.cGL-chat-messages').append('<div class="cGL-chat-message"><b>'+crown+data.nickname+':</b> '+data.msg+'</div>');
+
+        if (data.pid != localStorage.getItem('playerid')) {sound_newmsg_play()};
+        scrollLobbyBottomSChat();
+      });
+
+      $('.homepage').on('click', 'button.cGL-player-option-btn', function () {
+        let nick = $(this).parents('.cGL-player-in-team').find('.cGL-player-nick span').text().trim()
+
+        switch($(this).attr('setting')) {
+          case '0': confirm_action(null, 'kickfromlobby', $(this).parents('.cGL-player-in-team').attr('pid'), $('section[name="customGames-lobby"]').attr('token'), nick); $(this).tooltip('hide');break;
+          case '1': socket.emit('custom game allow to invite', $(this).parents('.cGL-player-in-team').attr('pid'));$(this).tooltip('hide');break;
+          case '2': confirm_action(null, 'givecrown', $(this).parents('.cGL-player-in-team').attr('pid'), null, nick); $(this).tooltip('hide');break;
+          case '3': socket.emit('add friend', $(this).parents('.cGL-player-in-team').find('.cGL-player-nick span').text().trim());$(this).tooltip('hide');$(this).remove();break;
+          case '4': info_msg('I should show '+nick+'\'s profile but it\'s not implemented yet!');break;
+        }
+
+      })
+
+      function tryKickFromLobby(pid, token) {socket.emit('custom game kick player', {'kickedid': pid, 'token': token})}
+      function tryRenounceCrown(pid) {socket.emit('custom game renounce crown', pid);}
+
+      socket.on('custom game new king', (data) => {
+        let oldkingnick = $('.cGL-player-in-team[pid='+data.oldkingid+']').find('.cGL-player-nick span').text().trim();
+        let newkingnick = $('.cGL-player-in-team[pid='+data.newkingid+']').find('.cGL-player-nick span').text().trim();
+
+        if (data.how) {
+          $('.cGL-chat-messages').append('<div class="cGL-chat-message"><i style="color: gold">King left, but <b>'+newkingnick+'</b> caught the crown! Good job!</i></div>')
+          $('.cGL-player-in-team[pid='+data.newkingid+'] .cGL-player-nick').prepend('<i class="fas fa-crown"></i> ');
+        } else if (!data.how) {
+          $('.cGL-chat-messages').append('<div class="cGL-chat-message"><i style="color: gold"><b>'+oldkingnick+'</b> gave his crown to the new king: <b>'+newkingnick+'!</b></i></div>')
+          $('.cGL-player-in-team[pid='+data.oldkingid+'] .cGL-player-nick i').insertBefore($('.cGL-player-in-team[pid='+data.newkingid+'] .cGL-player-nick span')).after(' ');
+        }; scrollLobbyBottomSChat();
+
+        if (data.oldkingid == localStorage.getItem('playerid')) {
+          $('.cGL-player-option-btn[setting="0"]').addClass('no-king')
+          $('.cGL-player-option-btn[setting="1"]').addClass('no-king')
+          $('.cGL-player-option-btn[setting="2"]').addClass('no-king')
+          $('.cGL-start-game-btn').attr({'disabled': 'disabled'});$('.cGL-invite-friend-btn').attr({'disabled': 'disabled'})
+        } else if (data.newkingid == localStorage.getItem('playerid')) {
+          $('.cGL-player-option-btn[setting="0"]').removeClass('no-king')
+          $('.cGL-player-option-btn[setting="1"]').removeClass('no-king')
+          $('.cGL-player-option-btn[setting="2"]').removeClass('no-king')
+          $('.cGL-start-game-btn').removeAttr('disabled');$('.cGL-invite-friend-btn').removeAttr('disabled')
+        }
+      })
+
+      socket.on('custom game kicked', (kickedres) => {
+        $('.cGL-chat-messages').append('<div class="cGL-chat-message"><i style="color: #00e5ff"><b>King</b> kicked and blocked '+kickedres.kickednick+'!</i></div>');
+        scrollLobbyBottomSChat();
+
+        if (kickedres.kickedid == localStorage.getItem('playerid')) {
+          $('.kickedfromlobby').appendTo('body').modal();
+          $('.kickedfromlobby').on('hidden.bs.modal', function() {$('.kickedfromlobby').remove()})
+          $('#login-page').css({'background-image': 'url("../assets/imgs/loginBG.jpg")'});
+          $('.homepage').fadeOut(700, () => {$('.homepage').html('').fadeIn(100);customGamesList()});
+          $('.client-menu-playbtn').attr({'data-lobby': 'false'}).text('PLAY');
+          $('.client-menu-play-custom').css({'background-color': '', 'cursor': 'pointer', 'color': 'white'});
+          $('.client-menu-play-custom').attr({'custom-list': false});
+        }
+      })
+
+      $('.homepage').on('click', 'button.cGL-join-btn', function() {
+        socket.emit('custom game switch team');
+      })
+
+      socket.on('custom game switch team res', function(data) {
+        $('.cGL-team-'+data.fromteam+' .cGL-player-in-team.full').last().after('<div class="cGL-player-in-team empty">Empty</div>');
+        if ($('.cGL-team-'+data.toteam+' .cGL-player-in-team.full').length > 0) {
+          $('.cGL-team-'+data.fromteam+' .cGL-player-in-team.full[pid='+data.pid+']').insertAfter($('.cGL-team-'+data.toteam+' .cGL-player-in-team.full').last())
+        } else {
+          $('.cGL-team-'+data.fromteam+' .cGL-player-in-team.full[pid='+data.pid+']').insertBefore($('.cGL-team-'+data.toteam+' .cGL-player-in-team.empty').first())
+        }
+        $('.cGL-team-'+data.toteam+' .cGL-player-in-team.empty').last().remove();
+
+        let teamcolor = $('.cGL-player-in-team.full[pid='+localStorage.getItem('playerid')+']').parents('.cGL-team-list').attr('teamcolor');
+        $('.cGL-player-in-team.empty button').remove();
+        $('.cGL-team-'+((teamcolor == 'red')?'blue':'red')+' .cGL-player-in-team.empty').first().prepend('<button class="darkmit cGL-join-btn">Join</button>');
+      })
+
+      socket.on('custom game new perms', function(data) {
+        let kingnick = $('.cGL-player-in-team[pid='+data.king+']').find('.cGL-player-nick span').text().trim();
+        let permmitednick = $('.cGL-player-in-team[pid='+data.allowedid+']').find('.cGL-player-nick span').text().trim();
+
+        switch(data.toggleto) {
+          case 0:
+            $('.cGL-chat-messages').append('<div class="cGL-chat-message"><i style="color: #64ff34"><b>'+kingnick+'</b> disallowed <b>'+permmitednick+'</b> to send invites!</i></div>');
+            if (data.allowedid == localStorage.getItem('playerid')) {$('button.cGL-invite-friend-btn').attr({'disabled': 'disabled'});$('.cGL-invite-friends-modal').modal('hide')}
+            if (data.king == localStorage.getItem('playerid')) $('.cGL-player-in-team.full[pid="'+data.allowedid+'"] .cGL-player-option-btn[setting="1"]').removeClass('granted')
+            break;
+          case 1:
+            $('.cGL-chat-messages').append('<div class="cGL-chat-message"><i style="color: #64ff34"><b>'+kingnick+'</b> allowed <b>'+permmitednick+'</b> to send invites!</i></div>');
+            if (data.allowedid == localStorage.getItem('playerid')) {$('button.cGL-invite-friend-btn').removeAttr('disabled');info_msg('<i class="fas fa-crown"></i> '+kingnick+' allowed you to send invites!')}
+            if (data.king == localStorage.getItem('playerid')) $('.cGL-player-in-team.full[pid="'+data.allowedid+'"] .cGL-player-option-btn[setting="1"]').addClass('granted')
+            break;
+        }
+
+        scrollLobbyBottomSChat();
+      });
+
+      $('.homepage').on('click', 'button.cGL-invite-friend-btn', function () {
+        let atif = $('.social-content-sub[status=1]').length + $('.social-content-sub[status=2]').length;
+        if (atif > 0) {
+          $('.cGL-invite-friends-modal .modal-body').html(''); var pid, img, status, nick;
+          $('.social-content-sub[status=1]').each(function () {
+            appendInviteModal($(this).attr('pid'), $(this).attr('status'), $(this).find('.social-friend img').attr('src'), $(this).find('.social-friend-nick span b').text())});
+          $('.social-content-sub[status=2]').each(function () {
+            appendInviteModal($(this).attr('pid'), $(this).attr('status'), $(this).find('.social-friend img').attr('src'), $(this).find('.social-friend-nick span b').text())});
+
+          function appendInviteModal(pid, status, img, nick) {
+            $('.cGL-invite-friends-modal .modal-body').append('\
+            <div class="friend" pid="'+pid+'">\
+              <div class="img"><img class="status-'+status+'" src="'+img+'"/></div>\
+              <div class="nick">'+nick+'</div>\
+              <div class="add"><button class="darkmit"><i class="fa fa-plus"></i></button></div>\
+            </div>')
+            if (($('.cGL-invite[pid='+pid+']').attr('status') == 'pending') || ($('.cGL-player-in-team.full[pid='+pid+']').length > 0)) $('.friend[pid='+pid+']').css({'background': 'rgba(0, 99, 0, 0.2)'}).find('.add button')
+            .attr({'disabled': 'disabled'})
+          }
+        } else $('.cGL-invite-friends-modal .modal-body').html('<div style="width: 100%; padding: 15px 5px; text-align: center"><b>No online friends at this moment</b></div>')
+        $('.cGL-invite-friends-modal').modal()
+      })
+
+      $('body').on('click', '.cGL-invite-friends-modal .add button', function() {
+        let pid = $(this).parents('.friend').attr('pid'), token = $('section[name="customGames-lobby"]').attr('token');
+        socket.emit('custom game send new invate', {'friendspid': pid, 'token': token})
+      })
+
+      socket.on('custom game add new invitation', function(data) {
+        if ($('.cGL-invite[pid="'+data.pid+'"]').length == 0) {
+          $('.cGL-invite-list').append('\
+          <div class="cGL-invite" pid="'+data.pid+'" status="pending" data-placement="bottom" data-toggle="tooltip" title="Invited by: '+data.from+'">\
+            <div class="cGL-invite-nick">'+data.invated+'</div><i class="fas fa-circle-notch fa-spin"></i>\
+          </div>'); $('[data-toggle="tooltip"]').tooltip();
+        } else customGameMakeHimPending(data.pid);
+
+
+        $('.cGL-invite-friends-modal .friend[pid='+data.pid+'] .add button').attr({'disabled': 'disabled', 'curser': 'not-allowed'});
+        $('.cGL-invite-friends-modal .friend[pid='+data.pid+'] .add button').parents('.friend').attr({'disabled':'disabled'}).css({'background': 'rgba(0, 99, 0, 0.2)'})
+
+        if ($('.cGL-invite-no-invites').css('display') == 'block') $('.cGL-invite-no-invites').hide();
+        if (data.from == localStorage.getItem('nickname')) success_msg('Invite sent to '+data.invated);
+      })
+
+      socket.on('custom game invitation', function(data) {
+        $('.social-game-invitations').prepend('<div class="social-game-invitation" token="'+data.token+'">\
+          <div class="social-game-inv-img"><img src="../assets/imgs/mapsminis/sr.webp" /></div>\
+          <div class="social-game-inv-info">\
+            <div class="social-game-inv-map">'+data.map+'</div>\
+            <div class="social-game-inv-nick">'+data.from+'</div>\
+          </div>\
+          <div class="social-game-inv-options">\
+            <div class="social-game-inv-accept"><i class="fa fa-check"></i></div>\
+            <div class="social-game-inv-decline"><i class="fa fa-times"></i></div>\
+          </div>\
+        </div>')
+        $('.social-game-invitation').show('slow');
+      });
+
+      $('.social-game-invitations').on('click', '.social-game-invitation .social-game-inv-accept', function () {
+        let token = $(this).parents('.social-game-invitation').attr('token');
+        $(this).parents('.social-game-invitation').css({'background-color': 'rgba(30, 169, 13, 0.41)'}).hide('drop', { direction: 'left'}, 'slow', function() {
+          $('.social-game-invitation[token="'+token+'"]').remove()})
+        $('.social-game-inv-accept').off('click');
+        socket.emit('custom game invitation accept', token);
+      });
+      $('.social-game-invitations').on('click', '.social-game-invitation .social-game-inv-decline', function () {
+        let token = $(this).parents('.social-game-invitation').attr('token');
+        $(this).parents('.social-game-invitation').css({'background-color': 'rgba(169, 13, 13, 0.41)'}).hide('drop', { direction: 'left'}, 'slow', function() {
+          $('.social-game-invitation[token="'+token+'"]').remove()})
+        socket.emit('custom game invitation decline', token);
+      });
+
+      socket.on('custom game invited left', (pid) => {customGameMakeHimDeclined(pid)})
+      socket.on('custom game invited declined', (pid) => {customGameMakeHimDeclined(pid)})
+      socket.on('custom game invited accepted', (pid) => {customGameMakeHimAccepted(pid)})
+
+      function customGameMakeHimPending(pid) {
+        let element = $('.cGL-invite[pid="'+pid+'"]');
+        element.attr({'status': 'pending'});
+        element.find('.cGL-invite-nick').removeClass('accepted').removeClass('decline');
+        element.find('i').remove();
+        element.append('<i class="fas fa-circle-notch fa-spin"></i>')
+      }
+
+      function customGameMakeHimDeclined(pid) {
+        let element = $('.cGL-invite[pid="'+pid+'"]');
+        element.attr({'status': 'declined'});
+        element.find('.cGL-invite-nick').removeClass('accepted').addClass('decline');
+        element.find('i').remove();
+        element.append('<i class="fa fa-times decline"></i>')
+      }
+
+      function customGameMakeHimAccepted(pid) {
+        let element = $('.cGL-invite[pid="'+pid+'"]');
+        element.attr({'status': 'accepted'});
+        element.find('.cGL-invite-nick').removeClass('decline').addClass('accepted');
+        element.find('i').remove();
+        element.append('<i class="fa fa-check accepted"></i>')
+      }
+
+      $('.homepage').on('click', 'button.cGL-start-game-btn', function () {
+        confirm_action(null, 'startgame', null, $('section[name="customGames-lobby"]').attr('token'), null)
+      });
+      function tryCGStart(token) {socket.emit('custom game start', token)}
+
+      socket.on('custom game started', function(data) {
+        changeEventStatus('In champion select'); showChampionSelect(data);
+        $('section[name="customGames-lobby"]').hide('fade', {}, 'slow');
+      })
+
+      socket.on('custom game force game stop', function(leaver) {
+        $('.cGL-chat-messages').append('<div class="cGL-chat-message"><i style="color: #ff5a5a"><b>'+leaver+'</b> left during the champion select.</i></div>');
+        sound_newmsg_play();scrollLobbyBottomSChat();
+        changeEventStatus('In lobby'); $('.client-menu').animate({'top': '0'}, 'slow');
+        $('.championselect').hide('fade', {}, 'fast', function() {$('.championselect').html('');$('section[name="customGames-lobby"]').show('fade', {}, 'slow')});
+        // sound_dash_title();
+        // sound_tick_and_tock();
+      })
+
+      function showChampionSelect(data) {
+        $('.client-menu').animate({'top': '-10vh'}, 'slow', function() {
+          $('.championselect').load('./models/championselect.html', function() {
+          var champjson = require('./../static_data/champion.json');champjson = champjson['data'];
+          $.each(champjson, function(index) {
+            $('.cS-pool').append('<div class="cS-champion-to-select"><label><input type="radio" name="champion" value="'+index+'" /><img src="../assets/imgs/champion/'+index+'.png"></label></div>');
+          })
+
+          $('.cS-w-map').text(data.map); $('.cS-w-mode').text(data.mode);
+          $('.cS-info-top-map').text(data.map); $('.cS-info-top-mode').text(data.mode + ' - ' + data.teamsizes);
+          $('.cS-info-top-is-custom').text(data.gametype);
+
+          $(document).ready(() => {
+            $('.cS-welcome').animate({'opacity': 1}, 600, function() {
+            $('.cS-w-mode').animate({'right': '-100px'}, 300, function() {
+              sound_dash_title();
+              $('.cS-w-mode').animate({'right': '0px'}, 2500, function() {
+                music_blind_pick.play()
+                $('.cS-w-mode').animate({'right': '731px'}, 300);
+                $('.cS-welcome').animate({'opacity': 0}, 300, function() {
+                  $('.cS-welcome').hide();
+                });
+                socket.emit('champion select send message', {'type': 'message', 'msg': 'mynickname'});
+                $('.cS-footer').css({'display': 'flex'}).animate({'opacity': 1});
+                $('.cS-center-header').show('slow').animate({'opacity': 1}, 'slow', function() {
+                  $('.cS-center-header span').animate({'opacity': 1});
+                  $('.cS-center-header .cS-timer div').animate({'opacity': 1});
+                  $('.cS-info-top').animate({'opacity': 1});
+                  $('.cS-ally-picks').animate({'left': 0}, 400, function() {
+                  sound_dash_title();
+                  setTimeout(() => {
+                    $('.cS-enemy-picks').animate({'right': 0}, 400, function() {
+                      sound_dash_title();
+
+                      $('.cS-smm-a').off('click');
+                      $('.cS-smm-a').on('click', function(e) {
+                        $('.cS-smm-b').popover('hide');
+                        $('.cS-smm-a').popover('toggle');
+                      });
+
+                      $('.cS-smm-b').off('click');
+                      $('.cS-smm-b').on('click', function(e) {
+                        $('.cS-smm-a').popover('hide');
+                        $('.cS-smm-b').popover('toggle');
+                      });
+
+                      $('body').off('click', '.popover .smmsa')
+                      $('body').on('click', '.popover .smmsa', function() {
+                        $('.cS-smm-a').popover('hide');
+                        success_msg('Clicked on smms a: '+$(this).find('img').attr('smid'))
+                      }); $('.cS-smm-a').on('shown.bs.popover', function() {$('.cS-smm-a').popover('update')})
+
+                      $('body').off('click', '.popover .smmsb')
+                      $('body').on('click', '.popover .smmsb', function() {
+                        $('.cS-smm-b').popover('hide');
+                        success_msg('Clicked on smms b: '+$(this).find('img').attr('smid'))
+                      }); $('.cS-smm-b').on('shown.bs.popover', function() {$('.cS-smm-b').popover('update')})
+
+                      setTimeout(() => {
+                        $('.cS-p-and-l').animate({'opacity': 1}, 600)
+                        championSelectReady();
+                      }, 1600)
+                    })}, 1000)})})})})
+          $('.cS-w-map').animate({'left': '-50px'}, 300, function() {
+            sound_dash_title();
+            $('.cS-w-map').animate({'left': '0px'}, 2500, function() {
+              $('.cS-w-map').animate({'left': '805px'}, 300)
+            })})})})
+          }).show('slow').animate({'opacity': 1}, 600);
+        })
+
+        setTimeout(() => {
+          updateHeaderCS('DUPA DUPA DUPA XD')
+        }, 7000)
+
+        function updateHeaderCS(newheader) {
+          $('.cS-header-bar span').hide('fade', {}, 'slow', () => {$('.cS-header-bar span').text(newheader).show('fade', {}, 'slow')});
+        }
+
+        function championSelectReady() {
+
+        }
+      }
+
+      function scrollBottomCSChat() {
+        var chatbox_chs = document.getElementById("cS-chat-messages");
+        chatbox_chs.scrollTop = chatbox_chs.scrollHeight;
+      }
+
+      $('.championselect').on('keyup', '.cS-chat-input input', function(e) {
+        if ((e.which === 13) && ($('.cS-chat-input input').val().length > 0) && ($('.cS-chat-input input').val().length <= 128)) {
+          socket.emit('champion select send message', $('.cS-chat-input input').val()); $('.cS-chat-input input').val('');
+        }
+      }); socket.on('champion select new message', function(data) {$('.cS-chat-messages').append('<div class="cS-chat-msg"><b>'+data.nickname+' </b>'+data.msg+'</div>');scrollBottomCSChat()})
 
     // contextMenu
       $(function() {
@@ -958,7 +1781,7 @@ $('body').tooltip({
       }
 
     // Actions confirm
-      function confirm_action(pid, type, n=null) {
+      function confirm_action(pid, type, n=null, token=null, cgnick=null) {
 
         let nick;
         if (n === null) nick = $('.social-content-sub[pid='+pid+'] .social-friend-nick span b').text();
@@ -976,6 +1799,24 @@ $('body').tooltip({
             $('.confirm_action').appendTo("body").modal();
             $('.confirm_action').on('hide.bs.modal', () => {$('.confirm_action_yes').off('click')})
             $('.confirm_action_yes').on('click', () => {tryIgnore(nick);$('.confirm_action').modal('hide')})
+          break;
+          case 'kickfromlobby':
+            $('.confirm_action_body').html('Do you wish to kick '+cgnick+' from lobby?');
+            $('.confirm_action').appendTo("body").modal();
+            $('.confirm_action').on('hide.bs.modal', () => {$('.confirm_action_yes').off('click')})
+            $('.confirm_action_yes').on('click', () => {tryKickFromLobby(n, token);$('.confirm_action').modal('hide')})
+          break;
+          case 'givecrown':
+            $('.confirm_action_body').html('Are you sure about renounce your crown to him? (New king: '+cgnick+')');
+            $('.confirm_action').appendTo("body").modal();
+            $('.confirm_action').on('hide.bs.modal', () => {$('.confirm_action_yes').off('click')})
+            $('.confirm_action_yes').on('click', () => {tryRenounceCrown(n, token);$('.confirm_action').modal('hide')})
+          break;
+          case 'startgame':
+            $('.confirm_action_body').html('Do you wish to start the game?');
+            $('.confirm_action').appendTo("body").modal();
+            $('.confirm_action').on('hide.bs.modal', () => {$('.confirm_action_yes').off('click')})
+            $('.confirm_action_yes').on('click', () => {tryCGStart(token);$('.confirm_action').modal('hide')})
           break;
         }
 

@@ -183,9 +183,10 @@ img {
   float: right;
 }
 #login-page {
-  background: url("../imgs/loginBG.jpg");
+  background-image: url("../imgs/loginBG.jpg");
   background-size: cover;height: 100vh;
   z-index: 10;
+  transition: background-image 1.5s;
 }
 #home-page {
   position: absolute;

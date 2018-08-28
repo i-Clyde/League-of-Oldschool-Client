@@ -13,8 +13,8 @@
 
   // Swap between register & login
   var scene = 'login';
-  function register_turn_on_trigger_click(){
-    $('#account-2').on('click', function(){
+  function register_turn_on_trigger_click() {
+    $('#account-2').on('click', function() {
       $(".log-inputs").animate({left: '-270px'}, "slow", function(){
         $(".login-bar").animate({'padding-top': '30px'}, "slow");
         $(".reg-inputs").animate({left: '15px'}, "slow");

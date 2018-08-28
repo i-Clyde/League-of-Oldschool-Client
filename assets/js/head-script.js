@@ -103,3 +103,32 @@ function settings_turn_trigger_click() {
     $('.settings').modal()
   });
 }
+
+function sound_newmsg_play() {
+  var sound_newmsg = new Audio('../assets/sounds/newmsg.mp3');
+  sound_newmsg.play();
+  delete sound_newmsg;
+}
+
+function sound_dash_title() {
+  var sound_dash_title = new Audio('../assets/sounds/dashtitle.wav');
+  sound_dash_title.play();
+  delete sound_dash_title;
+}
+
+var music_blind_pick = new Audio('../assets/sounds/blindpick.mp3');
+
+let tick = 0;
+function sound_tick_and_tock() {
+  if (tick == 0) {
+    var sound_tick = new Audio('../assets/sounds/tick.wav');
+    sound_tick.play();
+    delete sound_tick;
+    tick = 1;
+  } else {
+    tick = 0;
+    var sound_tock = new Audio('../assets/sounds/tock.wav');
+    sound_tock.play();
+    delete sound_tock;
+  }
+}

@@ -1,4 +1,7 @@
 TODO:
 1. Rejestracja - dodać captche
-2. Powiadomienia po zmianie wysokości headera niepoprawnie się wyświetlają (za wysoko) w mniejszych rozdzielczościach
+2. Powiadomienia po zmianie wysokości headera niepoprawnie się wyświetlają (za wysoko) [[[[[w mniejszych rozdzielczościach]]]]]
 3. Przeciąganie tekstu wyłączenie tej możliwości
+4. Zablokować przycisku powrotu podczas ładowania tworzenia nowej gry niestandardowej
+5. Globalchat po kliknięciu na przycisk nie scrolluje sie w doł
+6. Po wysłaniu pierwszej wiadomości odbiorca nie widzi 'last msg pod nickiem'

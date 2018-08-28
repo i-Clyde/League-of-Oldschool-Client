@@ -3,11 +3,16 @@ $('#settings-btn').off();
 // Set darker background
 $('.bg-darker').animate({'opacity': '1'}, 100);
 if (localStorage.getItem('nickname') == 'null') {
-  // Open modal nickanme
-  $('.firstloginsn').modal({
-    backdrop: false,
-    keyboard: false
-  }); $('#fnib').focus();
+  // Hide loader
+  $('.loader').animate({'opacity': 0}, 200, () => {
+    $('.loader').hide();
+
+    // Open modal nickanme
+    $('.firstloginsn').modal({
+      backdrop: false,
+      keyboard: false
+    }); $('#fnib').focus();
+  })
 
   // Live nickname check
   var nickok = false;
@@ -99,10 +104,18 @@ if (localStorage.getItem('nickname') == 'null') {
 function openIconselectSetup(a) {
   if (localStorage.getItem('iconid') == 'null') {
     if (a == 1) $('.firstloginsn').modal('toggle');
-    $('.iconsetup').modal({
-      backdrop: false,
-      keyboard: false
-    });
+
+    // Hide loader
+    $('.loader').animate({'opacity': 0}, 200, () => {
+      $('.loader').hide();
+
+      // Open modal nickanme
+      $('.iconsetup').modal({
+        backdrop: false,
+        keyboard: false
+      });
+    })
+
 
     var icons = localStorage.getItem('ownedicons').split(',');
     $.each( icons, function( data, id ) {
