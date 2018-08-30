@@ -1638,31 +1638,67 @@ function copyToClipboard(text){
       });
       function tryCGStart(token) {socket.emit('custom game start', token)}
 
-      socket.on('custom game started', function(data) {
-        changeEventStatus('In champion select'); showChampionSelect(data);
+      socket.on('custom game started', function(data, info) {
+        changeEventStatus('In champion select'); showChampionSelect(data, info);
         $('section[name="customGames-lobby"]').hide('fade', {}, 'slow');
       })
 
-      socket.on('custom game force game stop', function(leaver) {
-        $('.cGL-chat-messages').append('<div class="cGL-chat-message"><i style="color: #ff5a5a"><b>'+leaver+'</b> left during the champion select.</i></div>');
-        sound_newmsg_play();scrollLobbyBottomSChat();
-        changeEventStatus('In lobby'); $('.client-menu').animate({'top': '0'}, 'slow');
+      socket.on('custom game force game stop', function(leaver, type, map) {
+        music_blind_pick.pause();
+        music_blind_pick.currentTime = 0;
+        function whichMap(mapid) {switch(mapid) {case 1: return('sr');case 2: return('ha');case 3: return('tt');case 4: return('cs')}}
+        $('.cGL-chat-messages').append('<div class="cGL-chat-message"><i style="color: #ff5a5a">'+((type == 2)?'Somebody did not choose any champion':'<b>'+leaver+'</b> left during the champion select.')+'</i></div>');
+        sound_newmsg_play();scrollLobbyBottomSChat();$('.client-menu').animate({'top': '0'}, 'slow');
         $('.championselect').hide('fade', {}, 'fast', function() {$('.championselect').html('');$('section[name="customGames-lobby"]').show('fade', {}, 'slow')});
-        // sound_dash_title();
-        // sound_tick_and_tock();
+        setTimeout(() => {changeEventStatus('In lobby')}, 500); startFirstCSTimer('stop'); clearInterval(tickandtock); clearInterval(dangertimer)
+        $('#login-page').css({'background-image': 'url("../assets/imgs/mapsimgs/'+whichMap(map)+'.jpg")'});
       })
 
-      function showChampionSelect(data) {
+      function showChampionSelect(data, info) {
         $('.client-menu').animate({'top': '-10vh'}, 'slow', function() {
           $('.championselect').load('./models/championselect.html', function() {
-          var champjson = require('./../static_data/champion.json');champjson = champjson['data'];
+          var champjson = require('./../static_data/champion.json');champjson = champjson['data']; var typwmemqwe = [];
           $.each(champjson, function(index) {
-            $('.cS-pool').append('<div class="cS-champion-to-select"><label><input type="radio" name="champion" value="'+index+'" /><img src="../assets/imgs/champion/'+index+'.png"></label></div>');
+            $('.cS-pool').append('<div class="cS-champion-to-select" data-champion="'+index+'"><label><input type="radio" name="champion" value="'+index+'" disabled /><img src="../assets/imgs/champion/'+index+'.png"></label></div>');
+
+            typwmemqwe.push(index);
           })
+
+          let allyint = 0;
+          $.each(info.ally, function(i, v) {
+            $('.cS-ally-picks').append('<div class="cS-summoner ally summoner-not-ready in" pid="'+i+'" data-no="'+allyint+'">\
+              <img class="championimg" src="../assets/imgs/champion/unknown.webp" />\
+              <div class="cS-summoner-info">\
+                <div class="cS-summoner-nickname">'+v+'</div>\
+                <div class="cS-summoner-champion">Selecting...</div>\
+              </div>\
+              <div class="cS-summoner-spells">\
+                <div class="cS-spell-a"><img src="../assets/imgs/summs/'+info.summs[i].a+'.webp" /></div>\
+                <div class="cS-spell-b"><img src="../assets/imgs/summs/'+info.summs[i].b+'.webp" /></div>\
+              </div>\
+            </div>');
+            allyint++;
+          })
+
+          for (i=0;i<info.enemy;i++) {
+            $('.cS-enemy-picks').append('<div class="cS-summoner enemy summoner-not-ready in" data-no="'+i+'">\
+              <img class="championimg" src="../assets/imgs/champion/unknown.webp" />\
+              <div class="cS-summoner-info">\
+                <div class="cS-summoner-nickname">Summoner '+(i+1)+'</div>\
+                <div class="cS-summoner-champion">Selecting...</div>\
+              </div>\
+              <div class="cS-summoner-spells"><div class="cS-spell-a"></div><div class="cS-spell-b"></div></div>\
+            </div>');
+          }
+
+          $('.cS-summoner[placeholder="true"]').remove();
 
           $('.cS-w-map').text(data.map); $('.cS-w-mode').text(data.mode);
           $('.cS-info-top-map').text(data.map); $('.cS-info-top-mode').text(data.mode + ' - ' + data.teamsizes);
           $('.cS-info-top-is-custom').text(data.gametype);
+
+          $('.cS-smm-a img').attr({'src': '../assets/imgs/summs/'+info.summs[localStorage.getItem('playerid')].a+'.webp'});$('.cS-smm-a').attr({'a': info.summs[localStorage.getItem('playerid')].a});
+          $('.cS-smm-b img').attr({'src': '../assets/imgs/summs/'+info.summs[localStorage.getItem('playerid')].b+'.webp'});$('.cS-smm-b').attr({'b': info.summs[localStorage.getItem('playerid')].b});
 
           $(document).ready(() => {
             $('.cS-welcome').animate({'opacity': 1}, 600, function() {
@@ -1700,19 +1736,56 @@ function copyToClipboard(text){
 
                       $('body').off('click', '.popover .smmsa')
                       $('body').on('click', '.popover .smmsa', function() {
+                        let aspell = $('.cS-smm-a').attr('a'), bspell = $('.cS-smm-b').attr('b'), newspella = $(this).find('img').attr('smid');
+                        if (bspell == newspella) {
+                          $('.cS-smm-a').attr({'a': bspell}).find('img').attr({'src': '../assets/imgs/summs/'+bspell+'.webp'});
+                          $('.cS-smm-b').attr({'b': aspell}).find('img').attr({'src': '../assets/imgs/summs/'+aspell+'.webp'});
+                          socket.emit('summoner spell update', {'a': bspell, 'b': aspell})
+                        } else {
+                          $('.cS-smm-a').attr({'a': newspella}).find('img').attr({'src': '../assets/imgs/summs/'+newspella+'.webp'});
+                          socket.emit('summoner spell update', {'a': newspella, 'b': false})
+                        }
                         $('.cS-smm-a').popover('hide');
-                        success_msg('Clicked on smms a: '+$(this).find('img').attr('smid'))
                       }); $('.cS-smm-a').on('shown.bs.popover', function() {$('.cS-smm-a').popover('update')})
 
                       $('body').off('click', '.popover .smmsb')
                       $('body').on('click', '.popover .smmsb', function() {
-                        $('.cS-smm-b').popover('hide');
-                        success_msg('Clicked on smms b: '+$(this).find('img').attr('smid'))
+                        let aspell = $('.cS-smm-a').attr('a'), bspell = $('.cS-smm-b').attr('b'), newspellb = $(this).find('img').attr('smid');
+                        if (aspell == newspellb) {
+                          $('.cS-smm-b').attr({'b': aspell}).find('img').attr({'src': '../assets/imgs/summs/'+aspell+'.webp'});
+                          $('.cS-smm-a').attr({'a': bspell}).find('img').attr({'src': '../assets/imgs/summs/'+bspell+'.webp'});
+                          socket.emit('summoner spell update', {'a': bspell, 'b': aspell})
+                        } else {
+                          $('.cS-smm-b').attr({'b': newspellb}).find('img').attr({'src': '../assets/imgs/summs/'+newspellb+'.webp'});
+                          socket.emit('summoner spell update', {'a': false, 'b': newspellb})
+                        }
+                        $('.cS-smm-a').popover('hide');
                       }); $('.cS-smm-b').on('shown.bs.popover', function() {$('.cS-smm-b').popover('update')})
+
+                      $('div.cS-champion-to-select').off('click')
+                      $('div.cS-champion-to-select').on('click', 'label', function(e) {
+                        if ($(this).find('input').attr('disabled') != 'disabled') {
+                          let last = (($('input[name="champion"]:checked').length > 0)?$('input[name="champion"]:checked').val():false)
+                          if (last == false) $('div.cS-submit-champ button').removeAttr('disabled');
+                          let champion = $(this).parents('.cS-champion-to-select').attr('data-champion');
+                          $('input[name="champion"]').removeAttr('checked')
+                          $(this).find('input').attr({'checked': 'checked'})
+
+                          socket.emit('champion select declarate', champion, last)
+                        }
+                        e.stopPropagation();
+                        e.preventDefault();
+                      })
+
+                      $('div.cS-submit-champ button').off('click')
+                      $('div.cS-submit-champ button').on('click', function(e) {
+                        socket.emit('champion select try lock in', $('input[name="champion"]:checked').val())
+                        // e.stopPropagation();
+                        // e.preventDefault();
+                      })
 
                       setTimeout(() => {
                         $('.cS-p-and-l').animate({'opacity': 1}, 600)
-                        championSelectReady();
                       }, 1600)
                     })}, 1000)})})})})
           $('.cS-w-map').animate({'left': '-50px'}, 300, function() {
@@ -1722,18 +1795,6 @@ function copyToClipboard(text){
             })})})})
           }).show('slow').animate({'opacity': 1}, 600);
         })
-
-        setTimeout(() => {
-          updateHeaderCS('DUPA DUPA DUPA XD')
-        }, 7000)
-
-        function updateHeaderCS(newheader) {
-          $('.cS-header-bar span').hide('fade', {}, 'slow', () => {$('.cS-header-bar span').text(newheader).show('fade', {}, 'slow')});
-        }
-
-        function championSelectReady() {
-
-        }
       }
 
       function scrollBottomCSChat() {
@@ -1746,6 +1807,94 @@ function copyToClipboard(text){
           socket.emit('champion select send message', $('.cS-chat-input input').val()); $('.cS-chat-input input').val('');
         }
       }); socket.on('champion select new message', function(data) {$('.cS-chat-messages').append('<div class="cS-chat-msg"><b>'+data.nickname+' </b>'+data.msg+'</div>');scrollBottomCSChat()})
+
+      socket.on('champion select header update', (newheader) => {updateHeaderCS(newheader)})
+      function updateHeaderCS(newheader) {$('.cS-header-bar span').hide('fade', {}, 'slow', () => {$('.cS-header-bar span').text(newheader).show('fade', {}, 'slow')})}
+
+      socket.on('champion select new declarate', (champion, who, last) => {
+        if (last != false) {
+          $('.cS-champion-to-select[data-champion="'+last+'"] img').css({'filter': 'grayscale(0%)'});
+          $('.cS-champion-to-select[data-champion="'+last+'"] label').css({'cursor': 'pointer'});
+          $('.cS-champion-to-select[data-champion="'+last+'"] input').removeAttr('disabled');
+        }
+
+        $('.cS-summoner[pid="'+who+'"] .championimg').attr({'src': '../assets/imgs/champion/'+champion+'.png'})
+
+        $('.cS-champion-to-select[data-champion="'+champion+'"] img').css({'filter': 'grayscale(100%)'});
+        $('.cS-champion-to-select[data-champion="'+champion+'"] label').css({'cursor': 'not-allowed'});
+        $('.cS-champion-to-select[data-champion="'+champion+'"] input').attr({'disabled': 'disabled'});
+      })
+
+      socket.on('champion select summoner spell update', function(which) {
+        if (which.both) {
+          $('.cS-summoner[pid="'+which.who+'"] .cS-spell-a img').attr({'src': '../assets/imgs/summs/'+which.a+'.webp'});
+          $('.cS-summoner[pid="'+which.who+'"] .cS-spell-b img').attr({'src': '../assets/imgs/summs/'+which.b+'.webp'});
+        } else {
+          $('.cS-summoner[pid="'+which.who+'"] .cS-spell-'+which.x+' img').attr({'src': '../assets/imgs/summs/'+which.name+'.webp'});
+        }
+      })
+
+      socket.on('champion select new ready', function(who, where) {
+        if (where == 'success') {
+          $('.cS-submit-champ button').off('click')
+          $('.cS-submit-champ').off('click')
+          $('.cS-submit-champ button').attr({'disabled': 'disabled'})
+          $('div.cS-champion-to-select input').attr({'disabled': 'disabled'})
+          $('div.cS-champion-to-select').off('click').css({'cursor': 'not-allowed'})
+          $('div.cS-champion-to-select img').css({'filter': 'grayscale(100%)'})
+          $('div.cS-champion-to-select label').off('click').css({'cursor': 'not-allowed'})
+          $('#login-page').css({'background-image': 'url("../assets/imgs/splash/'+who+'_0.jpg")'});
+        } else {
+          if (where) {$('.cS-summoner.enemy[data-no="'+who+'"]').removeClass('summoner-not-ready in').css({'background-color': 'rgba(0, 0, 0, 0.2)'}, 'slow').find('.cS-summoner-champion').text('Ready!')}
+          else {$('.cS-summoner.ally[pid="'+who+'"]').removeClass('summoner-not-ready in').css({'background-color': 'rgba(0, 0, 0, 0.2)'}, 'slow').find('.cS-summoner-champion').text('Ready!')}
+        }
+      })
+
+      socket.on('champion select layout phase', function() {
+        clearInterval(tickandtock); clearInterval(dangertimer); startFirstCSTimer('stop');
+        startFirstCSTimer('start', 10, false)
+      })
+
+      socket.on('champion select force submit', function() {
+        $('.cS-submit-champ button').trigger('click');
+      })
+
+      socket.on('champion select ready', function(data, x) {$('.cS-champion-to-select input').removeAttr('disabled');clearInterval(tickandtock); clearInterval(dangertimer); startFirstCSTimer('stop');startFirstCSTimer(data, x)})
+      var timer, tickandtock, dangertimer, brick;
+      function startFirstCSTimer(cmd, x=-1, danger=true) {
+        if (cmd == 'start') {
+          timer = x;
+          tickandtock = setInterval(() => {
+            if (timer >= 0) {
+              $('.cS-timer.left div').text(timer);
+              $('.cS-timer.right div').text(timer);
+              sound_tick_and_tock();
+              if (timer === 10 && danger == true) toggleDangerTimer('start');
+              if (timer === 0) {clearInterval(dangertimer);$('.cS-timer.left div').css({'color': 'rgba(255, 255, 255, 0.9)'});$('.cS-timer.right div').css({'color': 'rgba(255, 255, 255, 0.9)'})};
+              timer--;
+            } else {clearInterval(tickandtock); clearInterval(dangertimer)}
+          }, 1000)
+
+          function toggleDangerTimer(danger) {
+            if (danger == 'start') {brick = 0};
+
+            dangertimer = setInterval(() => {
+              if (brick == 0) {
+                $('.cS-timer.left div').css({'color': 'firebrick'});
+                $('.cS-timer.right div').css({'color': 'firebrick'});
+                brick++;
+              } else if (brick == 1) {
+                $('.cS-timer.left div').css({'color': 'rgba(255, 255, 255, 0.9)'});
+                $('.cS-timer.right div').css({'color': 'rgba(255, 255, 255, 0.9)'});
+                brick--;
+              }
+            }, 500)
+          }
+        } else if (cmd == 'stop') {
+          timer = -1;
+          clearInterval(tickandtock); clearInterval(dangertimer)
+        }
+      }
 
     // contextMenu
       $(function() {

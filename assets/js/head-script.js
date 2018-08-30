@@ -1,4 +1,5 @@
 const {remote} = require('electron');
+var fs = require('fs');
 
 if (localStorage.getItem('resolution') == null) {
   remote.getCurrentWindow().setSize(1024, 576);
