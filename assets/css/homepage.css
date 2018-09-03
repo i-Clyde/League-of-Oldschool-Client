@@ -1905,3 +1905,47 @@ section[name="customGames-lobby"] .cGL-player-option-btn.no-king {
 .social-game-inv-decline:active {
   color: rgba(255, 255, 255, 0.6)
 }
+
+.ingame .underheader {
+  margin-top: -10px;
+  margin-left: -12px;
+}
+
+.ingame .ready-champions {
+  max-width: 653px;
+  margin: 0 auto;
+}
+
+.ingame .ingame-champ-image {
+  height: 100px;
+  width: 100px;
+  float: left;
+  border: 1px solid gold;
+  margin-left: 3px;
+  margin-right: 3px;
+}
+
+.ingame .ingame-champ-image img {
+  height: 101px;
+  width: 101px;
+  border: 2px solid transparent;
+  margin-top: -2px;
+  margin-left: -2px;
+}
+
+.ingame .ingame-btn {
+  max-width: 316px;
+  margin-top: -4px;
+}
+
+.ingame .champs-cover {
+  display: inline-block;
+  margin: 0 auto;
+}
+
+.ingame .ingame-btn-col:first-child {
+  text-align: right;
+}
+.ingame .ingame-btn-col:last-child {
+  text-align: left;
+}

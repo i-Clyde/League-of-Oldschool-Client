@@ -253,6 +253,11 @@
         $('#main-client').append('<div id="home-page"></div>');
         $('head').append('<link rel="stylesheet" href="../assets/css/homepage.css" />');
 
+        localStorage.setItem('gameport', res.gameinfo.port)
+        localStorage.setItem('isingame', res.gameinfo.isin)
+        localStorage.setItem('mygamepid', res.gameinfo.gamepid)
+        localStorage.setItem('gametoken', res.gameinfo.gametoken)
+
         $('#home-page').load('./unique/homepage.html', function(){
           $('.loader').show();
           $('.loader').animate({'opacity': 1}, 600);

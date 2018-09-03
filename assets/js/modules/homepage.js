@@ -71,6 +71,7 @@ function copyToClipboard(text){
   }
 
   function loadHomePage() {
+    const { exec } = require('child_process');
     if (localStorage.getItem('canplay')) {
 
       // Load user overview
@@ -95,8 +96,13 @@ function copyToClipboard(text){
             }
           }
         })
+        if (localStorage.getItem('isingame') != 'null') socket.emit('game load after relog', localStorage.getItem('gametoken'));
+        else startHomepage();
 
-        startHomepage();
+      })
+
+      socket.on('game load after relog res', function(info) {
+        startHomepage(info);
       })
 
       // Description changer (your)
@@ -222,11 +228,22 @@ function copyToClipboard(text){
       }
 
       // Show panels
-      function startHomepage() {
+      function startHomepage(info = null) {
         setTimeout(() => {
           $('.social-type-friends').animate({'left': '0', 'opacity': '1'}, 400)
           $('.social-zone').animate({'left': '0', 'opacity': '1'}, 400)
-          $('.client-menu').animate({'top': '0', 'opacity': '1'}, 400, () => {$('.homepage').animate({'opacity': 1}, 600)})
+          if (localStorage.getItem('isingame') == 'null') {
+            $('.client-menu').animate({'top': '0', 'opacity': '1'}, 400, () => {$('.homepage').animate({'opacity': 1}, 600)})
+          } else {
+            $('.championselect').load('./models/ingame.html', function() {
+
+              $.each(info, function(index, value) {
+                $('<div class="ingame-champ-image" data-isloaded="'+value.status+'" gpid="'+index+'" pid="'+value.pid+'"><img src="../assets/imgs/champion/'+value.champion+'.png" /></div>').insertBefore('.champs-cover.'+value.team+'-team .igbeforer');
+              });
+
+            }).css({'opacity': 1, 'display': 'block'});
+          }
+
         }, 500)
         $('.loader').animate({'opacity': 0}, 200, () => {
           $('.loader').hide();
@@ -1248,17 +1265,19 @@ function copyToClipboard(text){
       socket.on('custom game icon changed', function(data) {$('section[name=customGames-lobby] .cGL-player-in-team[pid='+data.pid+'] .cGL-player-img img').attr({'src': '../assets/imgs/profileicon/'+data.iconid+'.png'})})
 
       function addNewLobbyRoomToList(value) {
-        let padlock = (value.password)?'<i class="fa fa-lock">':'<i class="fa fa-unlock">', map;
-        switch(value.map) {
-          case 1: map = 'Summoner\'s rift';break;
-          case 2: map = 'Howling abyss';break;
-          case 3: map = 'Twisted threeline';break;
-          case 4: map = 'Crystal scar';break;
-        }
+        if (value.started != 'true') {
+          let padlock = (value.password)?'<i class="fa fa-lock">':'<i class="fa fa-unlock">', map;
+          switch(value.map) {
+            case 1: map = 'Summoner\'s rift';break;
+            case 2: map = 'Howling abyss';break;
+            case 3: map = 'Twisted threeline';break;
+            case 4: map = 'Crystal scar';break;
+          }
 
-        let teamsize = value.online+'/'+(parseInt(value.teamsize)+1)*2;
-        $('.cG-trs').prepend('<tr cG-room style="opacity: 0; height: 0" cG-room-token="'+value.token+'" cG-room-password="'+value.password+'"><td>'+padlock+'</td><td>'+value.name+'</td><td>'+map+'</td><td cGL-td-teamsize="'+(parseInt(value.teamsize)+1)*2+'" cGL-td-online="'+value.online+'">'+teamsize+'</td><td>'+value.createdby+'</td></tr>');
-        $('tr[cG-room-token="'+value.token+'"]').animate({'height': '34px', 'opacity': 1}, 600)
+          let teamsize = value.online+'/'+(parseInt(value.teamsize)+1)*2;
+          $('.cG-trs').prepend('<tr cG-room style="opacity: 0; height: 0" cG-room-token="'+value.token+'" cG-room-password="'+value.password+'"><td>'+padlock+'</td><td>'+value.name+'</td><td>'+map+'</td><td cGL-td-teamsize="'+(parseInt(value.teamsize)+1)*2+'" cGL-td-online="'+value.online+'">'+teamsize+'</td><td>'+value.createdby+'</td></tr>');
+          $('tr[cG-room-token="'+value.token+'"]').animate({'height': '34px', 'opacity': 1}, 600)
+        }
       }
 
       socket.on('custom game list load res', function(cGLR) {
@@ -1736,7 +1755,7 @@ function copyToClipboard(text){
 
                       $('body').off('click', '.popover .smmsa')
                       $('body').on('click', '.popover .smmsa', function() {
-                        let aspell = $('.cS-smm-a').attr('a'), bspell = $('.cS-smm-b').attr('b'), newspella = $(this).find('img').attr('smid');
+                        let aspell = $('.cS-smm-a').attr('a'), bspell = $('.cS-smm-b').attr('b'), newspella = $(this).find('img').attr('srealid');
                         if (bspell == newspella) {
                           $('.cS-smm-a').attr({'a': bspell}).find('img').attr({'src': '../assets/imgs/summs/'+bspell+'.webp'});
                           $('.cS-smm-b').attr({'b': aspell}).find('img').attr({'src': '../assets/imgs/summs/'+aspell+'.webp'});
@@ -1750,7 +1769,7 @@ function copyToClipboard(text){
 
                       $('body').off('click', '.popover .smmsb')
                       $('body').on('click', '.popover .smmsb', function() {
-                        let aspell = $('.cS-smm-a').attr('a'), bspell = $('.cS-smm-b').attr('b'), newspellb = $(this).find('img').attr('smid');
+                        let aspell = $('.cS-smm-a').attr('a'), bspell = $('.cS-smm-b').attr('b'), newspellb = $(this).find('img').attr('srealid');
                         if (aspell == newspellb) {
                           $('.cS-smm-b').attr({'b': aspell}).find('img').attr({'src': '../assets/imgs/summs/'+aspell+'.webp'});
                           $('.cS-smm-a').attr({'a': bspell}).find('img').attr({'src': '../assets/imgs/summs/'+bspell+'.webp'});
@@ -1859,6 +1878,29 @@ function copyToClipboard(text){
         $('.cS-submit-champ button').trigger('click');
       })
 
+      socket.on('game ready your gamepid', (gamepid) => {localStorage.setItem('gamepid', gamepid)});
+      socket.on('game successfully started info', (info) => {
+        updateHeaderCS('GAME WILL START SOON!')
+        changeEventStatus('In game');
+        setTimeout(() => {
+
+          $('.championselect').animate({'opacity': 0}, 600, () => {
+            $('.championselect').load('./models/ingame.html', function() {
+
+              $.each(info, function(index, value) {
+                $('<div class="ingame-champ-image" data-isloaded="'+value.status+'" gpid="'+index+'" pid="'+value.pid+'"><img src="../assets/imgs/champion/'+value.champion+'.png" /></div>').insertBefore('.champs-cover.'+value.team+'-team .igbeforer');
+              });
+
+            }).animate({'opacity': 1}, 600);
+          })
+
+        }, 1000)
+      })
+
+      socket.on('game successfully started', (gameport) => {
+        exec('start "" "C:/lol420/League_Sandbox_Client/League of Legends.exe" "8394" "LoLLauncher.exe" "" "176.241.73.111 '+gameport+' 17BLOhi6KZsTtldTsizvHg== '+(parseInt(localStorage.getItem('gamepid'))+1)+'"', {cwd: 'C:/lol420/League_Sandbox_Client'});
+      })
+
       socket.on('champion select ready', function(data, x) {$('.cS-champion-to-select input').removeAttr('disabled');clearInterval(tickandtock); clearInterval(dangertimer); startFirstCSTimer('stop');startFirstCSTimer(data, x)})
       var timer, tickandtock, dangertimer, brick;
       function startFirstCSTimer(cmd, x=-1, danger=true) {
@@ -1895,6 +1937,36 @@ function copyToClipboard(text){
           clearInterval(tickandtock); clearInterval(dangertimer)
         }
       }
+
+      socket.on('Game force ended', () => {
+        $('.championselect').animate({'opacity': 0}, 600, () => {$('.championselect').html('').css({'display': 'none'})});
+        $('.client-menu').animate({'top': '0', 'opacity': '1'}, 400, () => {$('.homepage').animate({'opacity': 1}, 600)});
+        $('section[name=customGames-lobby]').fadeOut(600, function() {
+          info_msg('Your game ended without resoult!')
+          $('.client-menu-playbtn').attr({'data-lobby': 'false'}).text('PLAY');
+          $('section[name=customGames-lobby]').remove();
+          $('.cGC-create-room-btn').off('click');
+          $('.cG-enter-fastcode').off('click');
+          $('button.close-customs-btn').off('click');
+          eventStatusDescEnd();
+        })
+        $('#login-page').css({'background-image': 'url("../assets/imgs/loginBG.jpg")'});
+      })
+
+      socket.on('Game successfully ended', () => {
+        $('.championselect').animate({'opacity': 0}, 600, () => {$('.championselect').html('').css({'display': 'none'})});
+        $('.client-menu').animate({'top': '0', 'opacity': '1'}, 400, () => {$('.homepage').animate({'opacity': 1}, 600)});
+        $('section[name=customGames-lobby]').fadeOut(600, function() {
+          success_msg('Your game successfully ended!')
+          $('.client-menu-playbtn').attr({'data-lobby': 'false'}).text('PLAY');
+          $('section[name=customGames-lobby]').remove();
+          $('.cGC-create-room-btn').off('click');
+          $('.cG-enter-fastcode').off('click');
+          $('button.close-customs-btn').off('click');
+          eventStatusDescEnd();
+        })
+        $('#login-page').css({'background-image': 'url("../assets/imgs/loginBG.jpg")'});
+      })
 
     // contextMenu
       $(function() {

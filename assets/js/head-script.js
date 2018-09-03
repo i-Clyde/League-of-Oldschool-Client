@@ -1,6 +1,9 @@
 const {remote} = require('electron');
 var fs = require('fs');
 
+  console.log(remote);
+  console.log(remote.getCurrentWindow());
+
 if (localStorage.getItem('resolution') == null) {
   remote.getCurrentWindow().setSize(1024, 576);
   remote.BrowserWindow.getFocusedWindow().center();
@@ -51,33 +54,36 @@ $( document ).ready(function() {
 });
 
 const io = require('socket.io-client');
-var socket = io('http://localhost:3000', {forceNew: true});
+var socket = io('http://iclyde.ddns.net:3000/', {forceNew: true});
 
-socket.on('disconnect', function(){
-  $('.lostconnectionmodal').modal({backdrop: 'static', keyboard: false});
-
-  var reconnected = false;
-  socket.on('reconnect', function(){
-    $('.lostconnectionmodal').modal('toggle');
-    reconnected = true; i=null, interval=null;
-    $('.lostconnectionmodal .lcmbtn').attr('disabled', 'disabled')
-  })
-
+var exitTimerInterval, reconnected = false;
+function startExitTimer() {
   var i=5; $('.lostconnectionmodal .lcmcd').html('('+i+')');
-  var lsin = setInterval(() => {
-    if (reconnected) clearInterval(lsin)
+  exitTimerInterval = setInterval(() => {
+    if (reconnected) clearInterval(exitTimerInterval);
     i--;
     $('.lostconnectionmodal .lcmcd').html('('+i+')');
     if (i==0) {
-      clearInterval(lsin)
+      clearInterval(exitTimerInterval)
       $('.lostconnectionmodal .lcmbtn').removeAttr('disabled');
       $('.lostconnectionmodal .lcmcd').html('');
     }
   }, 1000);
+}
 
+socket.on('disconnect', function(){
+  $('.lostconnectionmodal').modal({backdrop: 'static', keyboard: false});
+  reconnected = false; startExitTimer();
+})
+
+socket.on('reconnect', function(){
+  $('.lostconnectionmodal').modal('toggle');
+  $('.lostconnectionmodal .lcmbtn').attr('disabled', 'disabled');
+  reconnected = true; socket.emit('connecl');
 })
 
 // Check if socket connected to the server
+socket.emit('connecl');
 setTimeout(() => {
   if (!socket.connected) {
     $('#account-2').off('click');

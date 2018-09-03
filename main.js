@@ -1,9 +1,13 @@
-const {app, BrowserWindow} = require('electron')
+require('update-electron-app')()
+const {app, BrowserWindow, autoUpdater} = require('electron');
+
+const feed = `${server}/OWNER/REPO/${process.platform}/${app.getVersion()}`
+autoUpdater.setFeedURL(feed)
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 
-let win
+var win
 
 /////////////////
 // Resoultions //

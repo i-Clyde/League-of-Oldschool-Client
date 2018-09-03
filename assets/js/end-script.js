@@ -42,6 +42,10 @@ $(window).on("unload", function() {
   localStorage.removeItem('friendsid');
   localStorage.removeItem('token');
   localStorage.removeItem('canplay');
+  localStorage.removeItem('gameport');
+  localStorage.removeItem('gametoken');
+  localStorage.removeItem('isingame');
+  localStorage.removeItem('mygamepid');
 
   // var data = sessionStorage.getItem('key');
   // sessionStorage.removeItem('key');
