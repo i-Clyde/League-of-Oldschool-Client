@@ -1,7 +1,7 @@
 require('update-electron-app')()
 const {app, BrowserWindow, autoUpdater} = require('electron');
 
-const feed = `${server}/OWNER/REPO/${process.platform}/${app.getVersion()}`
+const feed = `${server}/i-Clyde/League-of-Oldschool-Client/${process.platform}/${app.getVersion()}`
 autoUpdater.setFeedURL(feed)
 
 // Keep a global reference of the window object, if you don't, the window will
