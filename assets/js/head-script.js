@@ -74,12 +74,12 @@ function startExitTimer() {
   }, 1000);
 }
 
-socket.on('disconnect', function(){
+socket.on('disconnect', function() {
   $('.lostconnectionmodal').modal({backdrop: 'static', keyboard: false});
   reconnected = false; startExitTimer(); scnsts = false;
 })
 
-socket.on('reconnect', function(){
+socket.on('reconnect', function() {
   $('.lostconnectionmodal').modal('toggle');
   $('.lostconnectionmodal .lcmbtn').attr('disabled', 'disabled');
   reconnected = true; socket.emit('connecl'); scnsts = true;
