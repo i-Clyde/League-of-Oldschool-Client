@@ -241,6 +241,29 @@ function copyToClipboard(text){
                 $('<div class="ingame-champ-image" data-isloaded="'+value.status+'" gpid="'+index+'" pid="'+value.pid+'"><img src="../assets/imgs/champion/'+value.champion+'.png" /></div>').insertBefore('.champs-cover.'+value.team+'-team .igbeforer');
               });
 
+              if (localStorage.getItem('isingame') == 'true') {
+                $('#void-vote-btn').removeAttr('disabled');
+                $('#reconnect-btn').attr({'disabled': 'disabled'}).text('Already connected');
+              } else {
+                $('#void-vote-btn').attr({'disabled': 'disabled'});
+                $('#reconnect-btn').removeAttr('disabled').text('Reconnect');
+              }
+
+              $('#void-vote-btn, #reconnect-btn').off('click');
+              $('#void-vote-btn').on('click', function() {
+
+                if (localStorage.getItem('isingame') == 'true') {
+                  socket.emit('game void vote');
+                } else error_msg('You have to be connected after game start. To vote');
+
+              });
+
+              $('#reconnect-btn').on('click', function() {
+                if (localStorage.getItem('isingame') == 'false') {
+                  exec('start "" "'+gameLolPath+'League of Legends.exe" "8394" "LoLLauncher.exe" "" "176.241.73.111 '+localStorage.getItem('gameport')+' 17BLOhi6KZsTtldTsizvHg== '+(parseInt(localStorage.getItem('gamepid'))+1)+'"', {cwd: gameLolPath});
+                } else error_msg('You are already in game, try relog if not or wait!');
+              });
+
             }).css({'opacity': 1, 'display': 'block'});
           }
 
@@ -1882,6 +1905,8 @@ function copyToClipboard(text){
       socket.on('game successfully started info', (info) => {
         updateHeaderCS('GAME WILL START SOON!')
         changeEventStatus('In game');
+        music_blind_pick.pause();
+        music_blind_pick.currentTime = 0;
         setTimeout(() => {
 
           $('.championselect').animate({'opacity': 0}, 600, () => {
@@ -1891,6 +1916,29 @@ function copyToClipboard(text){
                 $('<div class="ingame-champ-image" data-isloaded="'+value.status+'" gpid="'+index+'" pid="'+value.pid+'"><img src="../assets/imgs/champion/'+value.champion+'.png" /></div>').insertBefore('.champs-cover.'+value.team+'-team .igbeforer');
               });
 
+              if (localStorage.getItem('isingame') == 'true') {
+                $('#void-vote-btn').removeAttr('disabled');
+                $('#reconnect-btn').attr({'disabled': 'disabled'}).text('Already connected');
+              } else {
+                $('#void-vote-btn').attr({'disabled': 'disabled'});
+                $('#reconnect-btn').removeAttr('disabled').text('Reconnect');
+              }
+
+              $('#void-vote-btn, #reconnect-btn').off('click');
+              $('#void-vote-btn').on('click', function() {
+
+                if (localStorage.getItem('isingame') == 'true') {
+                  socket.emit('game void vote');
+                } else error_msg('You have to be connected after game start. To vote');
+
+              });
+
+              $('#reconnect-btn').on('click', function() {
+                if (localStorage.getItem('isingame') == 'false') {
+                  exec('start "" "'+gameLolPath+'League of Legends.exe" "8394" "LoLLauncher.exe" "" "176.241.73.111 '+localStorage.getItem('gameport')+' 17BLOhi6KZsTtldTsizvHg== '+(parseInt(localStorage.getItem('gamepid'))+1)+'"', {cwd: gameLolPath});
+                } else error_msg('You are already in game, try relog if not!');
+              });
+
             }).animate({'opacity': 1}, 600);
           })
 
@@ -1898,8 +1946,27 @@ function copyToClipboard(text){
       })
 
       socket.on('game successfully started', (gameport) => {
-        exec('start "" "C:/lol420/League_Sandbox_Client/League of Legends.exe" "8394" "LoLLauncher.exe" "" "176.241.73.111 '+gameport+' 17BLOhi6KZsTtldTsizvHg== '+(parseInt(localStorage.getItem('gamepid'))+1)+'"', {cwd: 'C:/lol420/League_Sandbox_Client'});
+        exec('start "" "'+gameLolPath+'League of Legends.exe" "8394" "LoLLauncher.exe" "" "176.241.73.111 '+gameport+' 17BLOhi6KZsTtldTsizvHg== '+(parseInt(localStorage.getItem('gamepid'))+1)+'"', {cwd: gameLolPath});
+        localStorage.setItem('gameport', gameport); localStorage.setItem('isingame', 'true')
       })
+
+      socket.on('game new ready', (gpid) => {
+
+
+      });
+      socket.on('game new unready', (gpid) => {
+
+
+      });
+      socket.on('game new void vote', (gpid) => {
+
+
+      });
+
+      socket.on('game map started', (gpid) => {
+
+
+      });
 
       socket.on('champion select ready', function(data, x) {$('.cS-champion-to-select input').removeAttr('disabled');clearInterval(tickandtock); clearInterval(dangertimer); startFirstCSTimer('stop');startFirstCSTimer(data, x)})
       var timer, tickandtock, dangertimer, brick;
@@ -1953,7 +2020,7 @@ function copyToClipboard(text){
         $('#login-page').css({'background-image': 'url("../assets/imgs/loginBG.jpg")'});
       })
 
-      socket.on('Game successfully ended', () => {
+      socket.on('Game successfully ended', () =>  {
         $('.championselect').animate({'opacity': 0}, 600, () => {$('.championselect').html('').css({'display': 'none'})});
         $('.client-menu').animate({'top': '0', 'opacity': '1'}, 400, () => {$('.homepage').animate({'opacity': 1}, 600)});
         $('section[name=customGames-lobby]').fadeOut(600, function() {

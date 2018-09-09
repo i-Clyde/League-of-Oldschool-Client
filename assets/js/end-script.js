@@ -3,11 +3,11 @@ $('.login-bar').animate({'right': '0px'}, "slow");
 // Load title bar (close, minimalize, center, settings menu)
 $('.body_head').load('./global/titlebarandoptions.html', function(){
   $('#center-btn').on('click', function(e) {
-    remote.BrowserWindow.getFocusedWindow().center();
+    win.center();
   });
 
   $('#min-btn').on('click', function(e){
-    remote.BrowserWindow.getFocusedWindow().minimize();
+    win.minimize();
   });
 
   $('#close-btn').on('click', function(e){
@@ -17,6 +17,10 @@ $('.body_head').load('./global/titlebarandoptions.html', function(){
     })
   });
   settings_turn_trigger_click();
+
+  $('[data-exitbtn="yeah"]').on('click', function() {
+    $('html, body').animate({ 'opacity': '0' }, 700);$('.login-bar').animate({'right': '270px'}, 1100, function(){win.close()});
+  })
 
 });
 

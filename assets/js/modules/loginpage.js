@@ -55,7 +55,7 @@
     //Register
     // // TODO: Add better (alerts for wrong queries while typing)
     var nickpattern = false, registerProcess = false;
-    $('#login-reg-input').on('keyup', function(){
+    $('#login-reg-input').on('keyup', function() {
       var patternick = /^[a-zA-Z0-9]*$/;
       if (patternick.test($('#login-reg-input').val())) {
         $('#span-reg-username').text("");
@@ -194,7 +194,7 @@
       registerProcess = false;
 
       $('<div class="alerts error">' + res.msg + '</div>').appendTo('.login-alerts');
-      $('.alerts.error').animate({'opacity': '1'}, 'slow').delay(10000).fadeOut('slow', function(){
+      $('.alerts.error').animate({'opacity': '1'}, 'slow').delay(10000).fadeOut('slow', function() {
         $('.alerts.error').remove();
       });
     }
@@ -255,7 +255,7 @@
 
         localStorage.setItem('gameport', res.gameinfo.port)
         localStorage.setItem('isingame', res.gameinfo.isin)
-        localStorage.setItem('mygamepid', res.gameinfo.gamepid)
+        localStorage.setItem('gamepid', res.gameinfo.gamepid)
         localStorage.setItem('gametoken', res.gameinfo.gametoken)
 
         $('#home-page').load('./unique/homepage.html', function(){

@@ -1,13 +1,38 @@
-require('update-electron-app')()
-const {app, BrowserWindow, autoUpdater} = require('electron');
+const {app, BrowserWindow} = require('electron');
+const {autoUpdater} = require("electron-updater");
+ app.on('ready', function()  {
+  autoUpdater.checkForUpdatesAndNotify();
+});
 
-const feed = `${server}/i-Clyde/League-of-Oldschool-Client/${process.platform}/${app.getVersion()}`
-autoUpdater.setFeedURL(feed)
+autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
+  const dialogOpts = {
+    type: 'info',
+    buttons: ['Restart', 'Later'],
+    title: 'Application Update',
+    message: process.platform === 'win32' ? releaseNotes : releaseName,
+    detail: 'A new version has been downloaded. Restart the application to apply the updates.'
+  }
 
-// Keep a global reference of the window object, if you don't, the window will
-// be closed automatically when the JavaScript object is garbage collected.
+  dialog.showMessageBox(dialogOpts, (response) => {
+    if (response === 0) autoUpdater.quitAndInstall()
+  })
+})
 
-var win
+var win = null;
+
+var shouldQuit = app.makeSingleInstance(function(commandLine, workingDirectory) {
+  // Someone tried to run a second instance, we should focus our window.
+  if (win) {
+    if (win.isMinimized()) win.restore();
+    win.focus();
+  }
+});
+
+if (shouldQuit) {
+  app.quit();
+  return;
+}
+
 
 /////////////////
 // Resoultions //
@@ -16,8 +41,8 @@ var win
 // 3. 1600x900 //
 /////////////////
 
-app.on('ready',()=>{
-  createWindow('components/index.html')
+app.on('ready',() => {
+  createWindow('./components/index.html')
 })
 
 function createWindow (path, nn = null) {
@@ -32,14 +57,17 @@ function createWindow (path, nn = null) {
     center: true,
     setMaximizable: false,
     setFullScreenable: false,
-    icon: __dirname + '/assets/icons/win/icon.ico',
+    resizable: false,
+    fullscreen: false,
+    'auto-hide-menu-bar': true,
+    'use-content-size': true,
+    icon: __dirname + '/icon.png',
     webPreferences: {
       experimentalFeatures: true
     }
   })
 
-  win.setResizable(false)
-  win.setFullScreen(false)
+  win.setFullScreenable(false);win.setMaximizable(false); win.isResizable(false);
 
   // i ładowanie index.html aplikacji.
   win.loadFile(path)

@@ -52,7 +52,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="exit_exit_confirm">No</button>
-        <button type="button" class="btn btn-secondary" onclick="$('html, body').animate({ 'opacity': '0' }, 700);$('.login-bar').animate({'right': '270px'}, 1100, function(){remote.BrowserWindow.getFocusedWindow().close()});">Yes</button>
+        <button type="button" class="btn btn-secondary" data-exitbtn="yeah">Yes</button>
       </div>
     </div>
   </div>
@@ -68,7 +68,7 @@
         <span>You lost connection with our system, please wait or relog!</span>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary lcmbtn" onclick="$('html, body').animate({ 'opacity': '0' }, 700);$('.login-bar').animate({'right': '270px'}, 1100, function(){remote.BrowserWindow.getFocusedWindow().close()});" disabled>Exit <span class="lcmcd">5</span></button>
+        <button type="button" class="btn btn-secondary lcmbtn" data-exitbtn="yeah" disabled>Exit <span class="lcmcd">5</span></button>
       </div>
     </div>
   </div>

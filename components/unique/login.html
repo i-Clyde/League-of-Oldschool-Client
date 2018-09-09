@@ -5,11 +5,11 @@
       <h3><b>SIGN IN</b></h3>
       <div class="form-group">
         <label>Username</label>
-        <input type="text" class="form-control" min="3" max="20" id="login-input" autofocus>
+        <input type="text" class="form-control" min="3" max="20" id="login-input" disabled autofocus>
       </div>
       <div class="form-group">
         <label>Password</label>
-        <input type="password" class="form-control" min="6" max="28" id="password-input">
+        <input type="password" class="form-control" min="6" max="28" id="password-input" disabled>
       </div>
       <div class="form-group form-check">
         <label class="custom-checkbox">
@@ -46,7 +46,7 @@
       </div>
     </div>
     <footer>
-      <button type="submit" class="btn" id="submit-log" disabled><b>SIGN IN</b><img src="../assets/imgs/spinner.gif" id="log-spinner" style="display: none" /></button>
+      <button type="submit" class="btn" id="submit-log" data-placement="right" disabled><b>SIGN IN</b><img src="../assets/imgs/spinner.gif" id="log-spinner" style="display: none" /></button>
       <button type="submit" class="btn" id="submit-reg" style="left: -270px" disabled><b>REGISTER</b><img src="../assets/imgs/spinner.gif" id="reg-spinner" style="display: none" /></button>
       <div class="links">
         <i id="account-1" class="text-muted" style="position: absolute;">Forgot password? [Disabled]</i><br />
@@ -56,7 +56,7 @@
         </div>
       </div>
       <div class="footer">
-        <span>V0.4.3 by iClyde</span>
+        <span>V0.5.2 by iClyde - <i>Prealpha Edition</i></span>
       </div>
     </footer>
   </div>

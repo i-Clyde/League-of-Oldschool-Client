@@ -19,8 +19,8 @@ body {
 :not(input):not(textarea),
 :not(input):not(textarea)::after,
 :not(input):not(textarea)::before {
-    -webkit-user-select: none;
-    user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 input, button, textarea, :focus {
   outline: none;
@@ -76,6 +76,11 @@ img {
 .alerts.error {
   border-left: 3px solid #aa0000;
   border-right: 3px solid #aa0000;
+}
+
+.alerts.info {
+  border-left: 3px solid #FFD700;
+  border-right: 3px solid #FFD700;
 }
 
 .modal-content {
